@@ -1,0 +1,130 @@
+// next id to use = 13
+characterDB = {	
+	"factions": {
+		"Legion": [
+			{
+				"id": 7,
+				"name": "Augustus",
+				"level": 4,
+				"imagePath": "images/placeholder.jpg",
+				"combatActions": "1/2/3: 2 DMG to Position 1",
+				"abilities": "During combat, prevent 1 DMG counter from being added to the character behind this character",
+				"factionBonus": "1/2: Gain +1 DMG to all Combat Actions",
+				"hp": 12	
+			},
+			{
+				"id": 8,
+				"name": "Matilda",
+				"level": 2,
+				"imagePath": "images/placeholder.jpg",
+				"combatActions": "1/2: 1 DMG to Position 1",
+				"abilities": "At end of turn, remove 1 DMG counter from each character in your lineup",
+				"factionBonus": "1/2: Gain +1 DMG to all Combat Actions",
+				"hp": 6	
+			},
+			{
+				"id": 9,
+				"name": "Milo",
+				"level": 1,
+				"imagePath": "images/placeholder.jpg",
+				"combatActions": "1/2: 1 DMG to Position 1",
+				"abilities": "At end of turn, look at 1 ACTION card in your opponent's hand",
+				"factionBonus": "1/2: Gain +1 DMG to all Combat Actions",
+				"hp": 6	
+			},
+			{
+				"id": 10,
+				"name": "Remus",
+				"level": 3,
+				"imagePath": "images/placeholder.jpg",
+				"combatActions": "1/2: 2 DMG to Position 1",
+				"abilities": "",
+				"factionBonus": "1/2: Gain +1 DMG to all Combat Actions",
+				"hp": 9
+			},
+			{
+				"id": 11,
+				"name": "Rufus",
+				"level": 3,
+				"imagePath": "images/placeholder.jpg",
+				"combatActions": "2 DMG to Position 3",
+				"abilities": "At end of turn, remove 1 DMG counter from each character in your lineup",
+				"factionBonus": "1/2: Gain +1 DMG to all Combat Actions",
+				"hp": 8
+			},
+			{
+				"id": 12,
+				"name": "Zeus",
+				"level": 2,
+				"imagePath": "images/placeholder.jpg",
+				"combatActions": "2 DMG to Position 1\n1 DMG to Position 2",
+				"abilities": "Whenever an opponent adds a character card to his/her lineup, add 3 DMG counters to it",
+				"factionBonus": "1/2: Gain +1 DMG to all Combat Actions",
+				"hp": 15
+			},
+		],
+		"Whirly West": [
+			{
+				"id": 1,
+				"name": "Billy",
+				"level": 4,
+				"imagePath": "images/placeholder.jpg",
+				"combatActions": "Impatient: 2 DMG to Position 1/2/3\nPatient: 1 DMG to Position 1/2/3",
+				"abilities": "",
+				"factionBonus": "At end of combat, remove 1 DMG counter that was gained during this round's combat phase only",
+				"hp": 7
+			},
+			{
+				"id": 2,
+				"name": "Carbine",
+				"level": 3,
+				"imagePath": "images/placeholder.jpg",
+				"combatActions": "2/3/4: 3 DMG to Position 3",
+				"abilities": "",
+				"factionBonus": "At end of combat, remove 1 DMG counter that was gained during this round's combat phase only",
+				"hp": 7
+			},
+			{
+				"id": 3,
+				"name": "Dexter",
+				"level": 1,
+				"imagePath": "images/placeholder.jpg",
+				"combatActions": "3/4: 2 DMG to Position 4",
+				"abilities": "",
+				"factionBonus": "At end of combat, remove 1 DMG counter that was gained during this round's combat phase only",
+				"hp": 4
+			},
+			{
+				"id": 4,
+				"name": "Remington",
+				"level": 2,
+				"imagePath": "images/placeholder.jpg",
+				"combatActions": "3 DMG to Position 2",
+				"abilities": "",
+				"factionBonus": "At end of combat, remove 1 DMG counter that was gained during this round's combat phase only",
+				"hp": 5
+			},
+			{
+				"id": 5,
+				"name": "Renegade Rick",
+				"level": 3,
+				"imagePath": "images/placeholder.jpg",
+				"combatActions": "1: 1 DMG to Position 1\n2/3/4: 2 DMG to Position 2",
+				"abilities": "During combat, if there is less than 4 character cards in your lineup, deal +1 DMG to all Combat Actions",
+				"factionBonus": "At end of combat, remove 1 DMG counter that was gained during this round's combat phase only",
+				"hp": 10
+			},
+			{
+				"id": 6,
+				"name": "Sheriff S4M",
+				"level": 5,
+				"imagePath": "images/placeholder.jpg",
+				"combatActions": "3 DMG to Position 1/2",
+				"abilities": "At end of turn, draw an ACTION card for each opposing character card that died during this turn's resolve combat phase",
+				"factionBonus": "At end of combat, remove 1 DMG counter that was gained during this round's combat phase only",
+				"hp": 12
+			},
+		],
+	}
+
+};

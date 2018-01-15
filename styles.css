@@ -20,8 +20,8 @@ body {
 
 /* base position properties */
 [class*="position"] {
-	width: 170px;
-	height: 300px;
+	width: 180px;
+	height: 380px;
 	margin-top: 10px;
 	margin-left: 5px;
 	margin-right: 5px;
@@ -42,6 +42,89 @@ body {
 .position4 {
 	background: dodgerblue;
 }
+
+.card-container {
+	background: white;
+	margin: 10px;
+}
+
+/* use of flex in order to fill horizontal space between name and level */
+.card-container .header {
+	display: flex;
+	flex-direction: row;
+	border-bottom: 1px solid black;
+}
+
+.card-container .header h3 {
+	color: black;
+	text-align: center;
+	font-size: 0.8em;
+	flex: auto;
+	margin: 0px;
+	padding: 0px;
+}
+
+.card-container .header .filler {
+	flex: auto;
+}
+
+.card-container bodyHeaderCombat {
+	color: teal;
+	font-size: 0.7em;
+	text-align: left;
+	display:block;
+	font-weight: bold;
+	border-top: 1px solid black;
+}
+
+.card-container bodyHeaderAbilities {
+	color: salmon;
+	font-size: 0.7em;
+	text-align: left;
+	display:block;
+	font-weight: bold;
+	border-top: 1px solid black;
+}
+
+.card-container bodyHeaderFaction {
+	color: mediumorchid;
+	font-size: 0.7em;
+	text-align: left;
+	display:block;
+	font-weight: bold;
+	border-top: 1px solid black;
+}
+
+.card-container hpHeader {
+	color: blue;
+	font-size: 0.8em;
+	text-align: center;
+	display:block;
+	font-weight: bold;
+	border-top: 1px solid black;
+}
+
+.card-container dmgHeader {
+	color: red;
+	font-size: 0.8em;
+	text-align: center;
+	display:block;
+	font-weight: bold;
+}
+
+.card-container img {
+	width: 140px;
+	height: 100px;
+	max-width: 100%;
+	max-height: 100%;
+}
+
+.card-container p {
+	font-size: 0.7em;
+	text-align: left;
+	margin: 0px;
+}
+
 input {
 
 }
