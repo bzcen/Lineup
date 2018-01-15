@@ -1,8 +1,49 @@
-.combat-field {
+body {
+	position: relative;
+	overflow: auto;
+}
 
+.combat-field {
+	display:inline-flex;
+}
+.lineup-container {
+	border: thick solid black;
+	margin: 10px;
+	display: inline-block;
+}
+.lineup-container h2 {
+	text-align: center;
+}
+.lineup {
+	display:inline-flex;
+}
+
+/* base position properties */
+[class*="position"] {
+	width: 170px;
+	height: 300px;
+	margin-top: 10px;
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-bottom: 10px;
+}
+[class*="position"] h3 {
+	text-align: center;
+}
+.position1 {
+	background: red;
+}
+.position2 {
+	background: orange;
+}
+.position3 {
+	background: lightgreen;
+}
+.position4 {
+	background: dodgerblue;
 }
 input {
-	
+
 }
 #next-phase {
 	background: blue;
