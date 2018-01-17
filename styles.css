@@ -18,8 +18,12 @@ body {
 	display:inline-flex;
 }
 
+.position-container {
+
+}
+
 /* base position properties */
-[class*="position"] {
+[class*="position-colored-container"] {
 	width: 210px;
 	height: 440px;
 	margin-top: 10px;
@@ -27,19 +31,21 @@ body {
 	margin-right: 5px;
 	margin-bottom: 10px;
 }
-[class*="position"] h3 {
+[class*="position-colored-container"] h3 {
 	text-align: center;
+	margin: 0;
+	padding-top: 10px;
 }
-.position1 {
+.position-colored-container1 {
 	background: red;
 }
-.position2 {
+.position-colored-container2 {
 	background: orange;
 }
-.position3 {
+.position-colored-container3 {
 	background: lightgreen;
 }
-.position4 {
+.position-colored-container4 {
 	background: dodgerblue;
 }
 
@@ -126,7 +132,7 @@ body {
 }
 
 .edit-dmg-container {
-	display: inline-block;
+	text-align: center;
 }
 
 .edit-dmg-button {

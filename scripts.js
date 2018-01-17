@@ -23,25 +23,33 @@ var player2Lineup = [];
 
 // on load, render cards
 window.onload = function() {
-	pushCardToLineup("Renegade Rick", true);
-	pushCardToLineup("Billy", true);
-	pushCardToLineup("Sheriff S4M", true);
-	pushCardToLineup("Dexter", true);
+	pushCardToTotal("Renegade Rick", true);
+	pushCardToTotal("Billy", true);
+	pushCardToTotal("Sheriff S4M", true);
+	pushCardToTotal("Dexter", true);
 
-	pushCardToLineup("Remus", false);
-	pushCardToLineup("Augustus", false);
-	pushCardToLineup("Zeus", false);
-	pushCardToLineup("Matilda", false);
-
-	// render HTML of all cards
-	
-	for (var i = 1; i <= 8; i++) {
-		displayCard(i);
+	// temporary
+	for (var i = 0; i < player1Cards.length; i++) {
+		pushCardToLineup(player1Cards[i], true);
 	}
+
+	pushCardToTotal("Remus", false);
+	pushCardToTotal("Augustus", false);
+	pushCardToTotal("Zeus", false);
+	pushCardToTotal("Matilda", false);
+
+	// temporary
+	for (var i = 0; i < player2Cards.length; i++) {
+		pushCardToLineup(player2Cards[i], false);
+	}
+
+	// render HTML of all lineup cards
+	displayLineup();
 };
 
 /*** DECK/LINEUP/HAND CONSTRUCTION FUNCTIONS ***/
 
+// will actual create the new card instance
 function pushCardToTotal(cardName, isPlayer1) {
 	var arrayToAddTo = (isPlayer1 ? player1Cards : player2Cards);
 
@@ -49,11 +57,11 @@ function pushCardToTotal(cardName, isPlayer1) {
 	arrayToAddTo.push(character);
 }
 
-function pushCardToLineup(cardName, isPlayer1) {
+// pushes a card by reference into a lineup
+function pushCardToLineup(card, isPlayer1) {
+	if (card == null) return;
 	var arrayToAddTo = (isPlayer1 ? player1Lineup : player2Lineup);
-
-	var character = constructCharacterFromDB(cardName);
-	arrayToAddTo.push(character);
+	arrayToAddTo.push(card);
 }
 
 function constructCharacterFromDB(cardName) {
@@ -91,7 +99,17 @@ function addDmg(id) {
 	// grab the array by reference of which player's cards we're dealing with
 	var cards = (isPlayer1(id) ? player1Lineup : player2Lineup);
 	var lineupIndex = getPlayerLineupIndex(id);
+	if (lineupIndex >= cards.length) {
+		alert("No card is here");
+		document.getElementById("edit-dmg-field" + id).value = "";
+		return;
+	}
 	var card = cards[lineupIndex];
+	if (card == null) {
+		alert("No card is here");
+		document.getElementById("edit-dmg-field" + id).value = "";
+		return;
+	}
 
 	card.dmg = card.dmg + num;
 	console.log(card.dmg);
@@ -114,6 +132,29 @@ function nextPhase() {
 function displayPhase() {
 	var tag = "Current Phase: ";
 	document.getElementById("phase-label").innerHTML = tag + phases[phaseIndex];
+}
+
+function displayLineup() {
+	displayPlayer1Lineup();
+	displayPlayer2Lineup();
+}
+
+function displayPlayer1Lineup() {
+	for (var i = 1; i <= 4; i++) {
+		var index = getPlayerLineupIndex(i);
+		// skip this position if it's not occupied
+		if (index >= player1Lineup.length || player1Lineup[index] == null) continue;
+		displayCard(i);
+	}
+}
+
+function displayPlayer2Lineup() {
+	for (var i = 5; i <= 8; i++) {
+		var index = getPlayerLineupIndex(i);
+		// skip this position if it's not occupied
+		if (index >= player2Lineup.length || player2Lineup[index] == null) continue;
+		displayCard(i);
+	}
 }
 
 // i=id# (card1,card2,card3,...)
