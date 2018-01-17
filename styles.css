@@ -20,8 +20,8 @@ body {
 
 /* base position properties */
 [class*="position"] {
-	width: 180px;
-	height: 380px;
+	width: 210px;
+	height: 440px;
 	margin-top: 10px;
 	margin-left: 5px;
 	margin-right: 5px;

@@ -28,8 +28,8 @@ window.onload = function() {
 
 	pushCardToLineup("Remus", false);
 	pushCardToLineup("Augustus", false);
-	pushCardToLineup("Rufus", false);
 	pushCardToLineup("Zeus", false);
+	pushCardToLineup("Matilda", false);
 
 	// render HTML of all cards
 	
@@ -91,13 +91,18 @@ function displayCard(i) {
 	var cards = (isPlayer1 ? player1Lineup : player2Lineup);
 	var card = cards[i];
 	// this is really ugly, but my excuse is that I am a bad programmer
+
+	// this catches for lack of combat actions
+	var combatActionsText = (card.combatActions != null ? card.combatActions.description : "");
+	var abilitiesText = (card.hasOwnProperty("abilities") ? card.abilities : "");
+
 	htmlString = 
 		"<div class=\"header\">" +
 		"<h3>" + card.name + "</h3>" + "<div class=\"filler\"></div>" + "<h3>Lvl." + card.level + "</h3>" +
 		"</div>" +
 		"<img src=\"" + card.imagePath + "\" alt=\"placeholder image\">" +
-		"<bodyHeaderCombat>Combat Actions</bodyHeaderCombat>" + "<p>" + card.combatActions + "</p>" +
-		"<bodyHeaderAbilities>Abilities</bodyHeaderAbilities>" + "<p>" + card.abilities + "</p>" +
+		"<bodyHeaderCombat>Combat Actions</bodyHeaderCombat>" + "<p>" + combatActionsText + "</p>" +
+		"<bodyHeaderAbilities>Abilities</bodyHeaderAbilities>" + "<p>" + abilitiesText + "</p>" +
 		"<bodyHeaderFaction>Faction Bonus</bodyHeaderFaction>" + "<p>" + card.factionBonus + "</p>" +
 		"<hpHeader>MAX HP: " + card.hp + "</hpHeader>" +
 		"<dmgHeader>DMG: " + card.dmg + "</dmgHeader>"

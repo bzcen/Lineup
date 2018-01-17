@@ -7,9 +7,18 @@ characterDB = {
 				"name": "Augustus",
 				"level": 4,
 				"imagePath": "images/placeholder.jpg",
-				"combatActions": "1/2/3: 2 DMG to Position 1",
+				"combatActions": {
+					"description": "1/2/3: 2 DMG to Position 1",
+					"details": [
+						{
+							"position": 7,
+							"target": 1,
+							"dmg": 2
+						}
+					]
+				},
 				"abilities": "During combat, prevent 1 DMG counter from being added to the character behind this character",
-				"factionBonus": "1/2: Gain +1 DMG to all Combat Actions",
+				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
 				"hp": 12	
 			},
 			{
@@ -17,49 +26,90 @@ characterDB = {
 				"name": "Matilda",
 				"level": 2,
 				"imagePath": "images/placeholder.jpg",
-				"combatActions": "1/2: 1 DMG to Position 1",
-				"abilities": "At end of turn, remove 1 DMG counter from each character in your lineup",
-				"factionBonus": "1/2: Gain +1 DMG to all Combat Actions",
+				"combatActions": null,
+				"abilities": "At end of turn, remove 2 DMG counters from friendly characters in Position 1 and Position 2",
+				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
 				"hp": 6	
 			},
 			{
 				"id": 9,
 				"name": "Milo",
-				"level": 1,
+				"level": 3,
 				"imagePath": "images/placeholder.jpg",
-				"combatActions": "1/2: 1 DMG to Position 1",
-				"abilities": "At end of turn, look at 1 ACTION card in your opponent's hand",
-				"factionBonus": "1/2: Gain +1 DMG to all Combat Actions",
-				"hp": 6	
+				"combatActions": {
+					"description": "3/4: 1 DMG to Position 1/2",
+					"details": [
+						{
+							"position": 12,
+							"target": 3,
+							"dmg": 1
+						}
+					]
+				},				
+				"abilities": "",
+				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+				"hp": 13	
 			},
 			{
 				"id": 10,
 				"name": "Remus",
-				"level": 3,
+				"level": 2,
 				"imagePath": "images/placeholder.jpg",
-				"combatActions": "1/2: 2 DMG to Position 1",
+				"combatActions": {
+					"description": "1/2: 2 DMG to Position 1",
+					"details": [
+						{
+							"position": 3,
+							"target": 1,
+							"dmg": 2
+						}
+					]
+				},
 				"abilities": "",
-				"factionBonus": "1/2: Gain +1 DMG to all Combat Actions",
+				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
 				"hp": 9
 			},
 			{
 				"id": 11,
 				"name": "Rufus",
-				"level": 3,
+				"level": 2,
 				"imagePath": "images/placeholder.jpg",
-				"combatActions": "2 DMG to Position 3",
+				"combatActions": {
+					"description": "2 DMG to Position 2",
+					"details": [
+						{
+							"position": 15,
+							"target": 2,
+							"dmg": 2
+						}
+					]
+				},
 				"abilities": "At end of turn, remove 1 DMG counter from each character in your lineup",
-				"factionBonus": "1/2: Gain +1 DMG to all Combat Actions",
-				"hp": 8
+				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+				"hp": 7
 			},
 			{
 				"id": 12,
 				"name": "Zeus",
 				"level": 2,
 				"imagePath": "images/placeholder.jpg",
-				"combatActions": "2 DMG to Position 1\n1 DMG to Position 2",
+				"combatActions": {
+					"description": "2 DMG to Position 1\n1 DMG to Position 2",
+					"details": [
+						{
+							"position": 15,
+							"target": 1,
+							"dmg": 2
+						},
+						{
+							"position": 15,
+							"target": 2,
+							"dmg": 1
+						}
+					]
+				},
 				"abilities": "Whenever an opponent adds a character card to his/her lineup, add 3 DMG counters to it",
-				"factionBonus": "1/2: Gain +1 DMG to all Combat Actions",
+				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
 				"hp": 15
 			},
 		],
@@ -69,7 +119,22 @@ characterDB = {
 				"name": "Billy",
 				"level": 4,
 				"imagePath": "images/placeholder.jpg",
-				"combatActions": "Impatient: 2 DMG to Position 1/2/3\nPatient: 1 DMG to Position 1/2/3",
+				"combatActions": {
+					"description": "Eager: 1 DMG to Position 1/2/3\n1 DMG to Position 1/2/3",
+					"details": [
+						{
+							"position": 15,
+							"target": 15,
+							"dmg": 1,
+							"keyword": 1
+						},
+						{
+							"position": 15,
+							"target": 15,
+							"dmg": 1
+						}
+					]
+				},
 				"abilities": "",
 				"factionBonus": "At end of combat, remove 1 DMG counter that was gained during this round's combat phase only",
 				"hp": 7
@@ -79,7 +144,16 @@ characterDB = {
 				"name": "Carbine",
 				"level": 3,
 				"imagePath": "images/placeholder.jpg",
-				"combatActions": "2/3/4: 3 DMG to Position 3",
+				"combatActions": {
+					"description": "2/3/4: 3 DMG to Position 3",
+					"details": [
+						{
+							"position": 14,
+							"target": 3,
+							"dmg": 3
+						}
+					]
+				},
 				"abilities": "",
 				"factionBonus": "At end of combat, remove 1 DMG counter that was gained during this round's combat phase only",
 				"hp": 7
@@ -89,7 +163,16 @@ characterDB = {
 				"name": "Dexter",
 				"level": 1,
 				"imagePath": "images/placeholder.jpg",
-				"combatActions": "3/4: 2 DMG to Position 4",
+				"combatActions": {
+					"description": "3/4: 2 DMG to Position 4",
+					"details": [
+						{
+							"position": 12,
+							"target": 8,
+							"dmg": 2
+						}
+					]
+				},
 				"abilities": "",
 				"factionBonus": "At end of combat, remove 1 DMG counter that was gained during this round's combat phase only",
 				"hp": 4
@@ -99,7 +182,16 @@ characterDB = {
 				"name": "Remington",
 				"level": 2,
 				"imagePath": "images/placeholder.jpg",
-				"combatActions": "3 DMG to Position 2",
+				"combatActions": {
+					"description": "3 DMG to Position 2",
+					"details": [
+						{
+							"position": 15,
+							"target": 2,
+							"dmg": 3
+						}
+					]
+				},
 				"abilities": "",
 				"factionBonus": "At end of combat, remove 1 DMG counter that was gained during this round's combat phase only",
 				"hp": 5
@@ -109,7 +201,21 @@ characterDB = {
 				"name": "Renegade Rick",
 				"level": 3,
 				"imagePath": "images/placeholder.jpg",
-				"combatActions": "1: 1 DMG to Position 1\n2/3/4: 2 DMG to Position 2",
+				"combatActions": {
+					"description": "1: 1 DMG to Position 1\n2/3/4: 2 DMG to Position 2",
+					"details": [
+						{
+							"position": 1,
+							"target": 1,
+							"dmg": 1
+						},
+						{
+							"position": 14,
+							"target": 2,
+							"dmg": 2
+						}
+					]
+				},
 				"abilities": "During combat, if there is less than 4 character cards in your lineup, deal +1 DMG to all Combat Actions",
 				"factionBonus": "At end of combat, remove 1 DMG counter that was gained during this round's combat phase only",
 				"hp": 10
@@ -119,7 +225,16 @@ characterDB = {
 				"name": "Sheriff S4M",
 				"level": 5,
 				"imagePath": "images/placeholder.jpg",
-				"combatActions": "3 DMG to Position 1/2",
+				"combatActions": {
+					"description": "3 DMG to Position 1/2",
+					"details": [
+						{
+							"position": 15,
+							"target": 3,
+							"dmg": 3
+						}
+					]
+				},
 				"abilities": "At end of turn, draw an ACTION card for each opposing character card that died during this turn's resolve combat phase",
 				"factionBonus": "At end of combat, remove 1 DMG counter that was gained during this round's combat phase only",
 				"hp": 12
