@@ -6,7 +6,7 @@ characterDB = {
 				"id": 7,
 				"name": "Augustus",
 				"level": 4,
-				"imagePath": "images/placeholder.jpg",
+				"imagePath": "images/legion_placeholder.jpg",
 				"combatActions": {
 					"description": "1/2/3: 2 DMG to Position 1",
 					"details": [
@@ -25,7 +25,7 @@ characterDB = {
 				"id": 8,
 				"name": "Matilda",
 				"level": 2,
-				"imagePath": "images/placeholder.jpg",
+				"imagePath": "images/legion_placeholder.jpg",
 				"combatActions": null,
 				"abilities": "At end of turn, remove 2 DMG counters from friendly characters in Position 1 and Position 2",
 				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
@@ -35,7 +35,7 @@ characterDB = {
 				"id": 9,
 				"name": "Milo",
 				"level": 3,
-				"imagePath": "images/placeholder.jpg",
+				"imagePath": "images/legion_placeholder.jpg",
 				"combatActions": {
 					"description": "3/4: 1 DMG to Position 1/2",
 					"details": [
@@ -54,7 +54,7 @@ characterDB = {
 				"id": 10,
 				"name": "Remus",
 				"level": 2,
-				"imagePath": "images/placeholder.jpg",
+				"imagePath": "images/legion_placeholder.jpg",
 				"combatActions": {
 					"description": "1/2: 2 DMG to Position 1",
 					"details": [
@@ -73,7 +73,7 @@ characterDB = {
 				"id": 11,
 				"name": "Rufus",
 				"level": 2,
-				"imagePath": "images/placeholder.jpg",
+				"imagePath": "images/legion_placeholder.jpg",
 				"combatActions": {
 					"description": "2 DMG to Position 2",
 					"details": [
@@ -92,7 +92,7 @@ characterDB = {
 				"id": 12,
 				"name": "Zeus",
 				"level": 2,
-				"imagePath": "images/placeholder.jpg",
+				"imagePath": "images/legion_placeholder.jpg",
 				"combatActions": {
 					"description": "2 DMG to Position 1\n1 DMG to Position 2",
 					"details": [
@@ -118,7 +118,7 @@ characterDB = {
 				"id": 1,
 				"name": "Billy",
 				"level": 4,
-				"imagePath": "images/placeholder.jpg",
+				"imagePath": "images/whirly_west_placeholder.png",
 				"combatActions": {
 					"description": "Eager: 1 DMG to Position 1/2/3\n1 DMG to Position 1/2/3",
 					"details": [
@@ -143,7 +143,7 @@ characterDB = {
 				"id": 2,
 				"name": "Carbine",
 				"level": 3,
-				"imagePath": "images/placeholder.jpg",
+				"imagePath": "images/whirly_west_placeholder.png",
 				"combatActions": {
 					"description": "2/3/4: 3 DMG to Position 3",
 					"details": [
@@ -162,7 +162,7 @@ characterDB = {
 				"id": 3,
 				"name": "Dexter",
 				"level": 1,
-				"imagePath": "images/placeholder.jpg",
+				"imagePath": "images/whirly_west_placeholder.png",
 				"combatActions": {
 					"description": "3/4: 2 DMG to Position 4",
 					"details": [
@@ -181,7 +181,7 @@ characterDB = {
 				"id": 4,
 				"name": "Remington",
 				"level": 2,
-				"imagePath": "images/placeholder.jpg",
+				"imagePath": "images/whirly_west_placeholder.png",
 				"combatActions": {
 					"description": "3 DMG to Position 2",
 					"details": [
@@ -200,7 +200,7 @@ characterDB = {
 				"id": 5,
 				"name": "Renegade Rick",
 				"level": 3,
-				"imagePath": "images/placeholder.jpg",
+				"imagePath": "images/whirly_west_placeholder.png",
 				"combatActions": {
 					"description": "1: 1 DMG to Position 1\n2/3/4: 2 DMG to Position 2",
 					"details": [
@@ -224,7 +224,7 @@ characterDB = {
 				"id": 6,
 				"name": "Sheriff S4M",
 				"level": 5,
-				"imagePath": "images/placeholder.jpg",
+				"imagePath": "images/whirly_west_placeholder.png",
 				"combatActions": {
 					"description": "3 DMG to Position 1/2",
 					"details": [
