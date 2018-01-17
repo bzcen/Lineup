@@ -19,6 +19,8 @@ var player2Cards = [];
 var player1Lineup = [];
 var player2Lineup = [];
 
+/*** SETUP FUNCTIONS ***/
+
 // on load, render cards
 window.onload = function() {
 	pushCardToLineup("Renegade Rick", true);
@@ -37,6 +39,8 @@ window.onload = function() {
 		displayCard(i);
 	}
 };
+
+/*** DECK/LINEUP/HAND CONSTRUCTION FUNCTIONS ***/
 
 function pushCardToTotal(cardName, isPlayer1) {
 	var arrayToAddTo = (isPlayer1 ? player1Cards : player2Cards);
@@ -67,11 +71,45 @@ function constructCharacterFromDB(cardName) {
 	}
 }
 
+/*** DMG FUNCTIONS ***/
+
+function addDmg(id) {
+	var fieldValue = document.getElementById("edit-dmg-field" + id).value;
+
+	var num = Number(fieldValue);
+	if (num == NaN) {
+		alert("Input a number");
+		document.getElementById("edit-dmg-field" + id).value = "";
+		return;
+	}
+	if (num%1!=0) {
+		alert("Input a whole number");
+		document.getElementById("edit-dmg-field" + id).value = "";
+		return;
+	}
+
+	// grab the array by reference of which player's cards we're dealing with
+	var cards = (isPlayer1(id) ? player1Lineup : player2Lineup);
+	var lineupIndex = getPlayerLineupIndex(id);
+	var card = cards[lineupIndex];
+
+	card.dmg = card.dmg + num;
+	console.log(card.dmg);
+
+	// redisplay the card with the modified DMG value
+	displayCard(id);
+	document.getElementById("edit-dmg-field" + id).value = "";
+}
+
+/*** PHASE FUNCTIONS ***/
+
 function nextPhase() {
 	phaseIndex++;
 	if (phaseIndex >= phases.length) phaseIndex = 0;
 	displayPhase();
 }
+
+/*** DISPLAY FUNCTIONS ***/
 
 function displayPhase() {
 	var tag = "Current Phase: ";
@@ -82,14 +120,10 @@ function displayPhase() {
 function displayCard(i) {
 	var div = document.getElementById("card" + i);
 
-	var isPlayer1 = i <= 4;
-	// if Player1, pos1 is actually id=card4, pos2 card is id=card3, pos3 is id=card2, pos4 is id=card1
-	// keep in mind things are 0-based indexes in the arrays themselves though
-	var fixedIds = [3, 2, 1, 0];
-	i = (isPlayer1 ? fixedIds[i-1] : i-5);
 	// grab the array by reference of which player's cards we're dealing with
-	var cards = (isPlayer1 ? player1Lineup : player2Lineup);
-	var card = cards[i];
+	var cards = (isPlayer1(i) ? player1Lineup : player2Lineup);
+	var lineupIndex = getPlayerLineupIndex(i);
+	var card = cards[lineupIndex];
 	// this is really ugly, but my excuse is that I am a bad programmer
 
 	// this catches for lack of combat actions
@@ -109,4 +143,19 @@ function displayCard(i) {
 	;
 
 	div.innerHTML = htmlString;
+}
+
+/*** OTHER HELPER FUNCTIONS ***/
+
+// returns whether an id refers to Player 1's stuff
+function isPlayer1(id) {
+	return id <= 4;
+}
+
+// returns the appropriate index of player's lineup given an id
+function getPlayerLineupIndex(id) {
+	// if Player1, pos1 is actually id=card4, pos2 card is id=card3, pos3 is id=card2, pos4 is id=card1
+	// keep in mind things are 0-based indexes in the arrays themselves though
+	var fixedIds = [3, 2, 1, 0];
+	return (isPlayer1(id) ? fixedIds[id-1] : id-5);
 }

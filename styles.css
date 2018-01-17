@@ -125,6 +125,25 @@ body {
 	margin: 0px;
 }
 
+.edit-dmg-container {
+	display: inline-block;
+}
+
+.edit-dmg-button {
+	width: 75px;
+	height: 40px;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: bold;
+}
+
+.edit-dmg-field {
+	width: 30px;
+	height: 20px;
+	font-size: 18px;
+	font-weight: bold;
+}
+
 input {
 
 }
