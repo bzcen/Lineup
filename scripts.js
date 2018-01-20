@@ -18,6 +18,10 @@ var player1Cards = [];
 var player2Cards = [];
 var player1Lineup = [];
 var player2Lineup = [];
+var player1Standby = [];
+var player2Standby = [];
+var player1Defeated = [];
+var player2Defeated = [];
 
 /*** SETUP FUNCTIONS ***/
 
@@ -61,6 +65,20 @@ function pushCardToTotal(cardName, isPlayer1) {
 function pushCardToLineup(card, isPlayer1) {
 	if (card == null) return;
 	var arrayToAddTo = (isPlayer1 ? player1Lineup : player2Lineup);
+	arrayToAddTo.push(card);
+}
+
+// pushes a card by reference into a defeated pool
+function pushCardToDefeated(card, isPlayer1) {
+	if (card == null) return;
+	var arrayToAddTo = (isPlayer1 ? player1Defeated : player2Defeated);
+	arrayToAddTo.push(card);
+}
+
+// pushes a card by reference into a standby pool
+function pushCardToStandby(card, isPlayer1) {
+	if (card == null) return;
+	var arrayToAddTo = (isPlayer1 ? player1Standby : player2Standby);
 	arrayToAddTo.push(card);
 }
 
@@ -117,6 +135,18 @@ function addDmg(id) {
 	// redisplay the card with the modified DMG value
 	displayCard(id);
 	document.getElementById("edit-dmg-field" + id).value = "";
+}
+
+/*** LINEUP MOVEMENT FUNCTIONS ***/
+
+// moves a card located at id to corresponding player's defeated pool
+function moveToDefeated(id) {
+
+}
+
+// moves a card located at id to corresponding player's standby pool
+function moveToStandby(id) {
+
 }
 
 /*** PHASE FUNCTIONS ***/

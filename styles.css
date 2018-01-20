@@ -19,7 +19,7 @@ body {
 }
 
 .position-container {
-
+	padding-bottom: 10px;
 }
 
 /* base position properties */
@@ -81,6 +81,7 @@ body {
 	display:block;
 	font-weight: bold;
 	border-top: 1px solid black;
+	padding-top: 3px;
 }
 
 .card-container bodyHeaderAbilities {
@@ -90,6 +91,7 @@ body {
 	display:block;
 	font-weight: bold;
 	border-top: 1px solid black;
+	padding-top: 3px;
 }
 
 .card-container bodyHeaderFaction {
@@ -99,6 +101,7 @@ body {
 	display:block;
 	font-weight: bold;
 	border-top: 1px solid black;
+	padding-top: 3px;
 }
 
 .card-container hpHeader {
@@ -148,6 +151,28 @@ body {
 	height: 20px;
 	font-size: 18px;
 	font-weight: bold;
+}
+
+.move-to-defeated-button {
+	height: 40px;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: bold;
+	margin-left: auto;
+	margin-right: auto;
+	width: 90%;
+	display: block;
+}
+
+.move-to-standby-button {
+	height: 40px;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: bold;
+	margin-left: auto;
+	margin-right: auto;
+	width: 90%;
+	display: block;
 }
 
 input {
