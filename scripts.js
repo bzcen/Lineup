@@ -139,14 +139,48 @@ function addDmg(id) {
 
 /*** LINEUP MOVEMENT FUNCTIONS ***/
 
-// moves a card located at id to corresponding player's defeated pool
+// moves a card located at id in lineup to corresponding player's defeated pool
 function moveToDefeated(id) {
+	// grab the array by reference of which player's cards we're dealing with
+	var cards = (isPlayer1(id) ? player1Lineup : player2Lineup);
+	var lineupIndex = getPlayerLineupIndex(id);
+	if (lineupIndex >= cards.length) {
+		alert("No card is here");
+		return;
+	}
+	var card = cards[lineupIndex];
+	if (card == null) {
+		alert("No card is here");
+		return;
+	}
+	var defeated = (isPlayer1(id) ? player1Defeated: player2Defeated);
+	defeated.push(card);
+	cards[lineupIndex] = null;
 
+	// redisplay the spot
+	displayCard(id);
 }
 
-// moves a card located at id to corresponding player's standby pool
+// moves a card located at id in lineup to corresponding player's standby pool
 function moveToStandby(id) {
+	// grab the array by reference of which player's cards we're dealing with
+	var cards = (isPlayer1(id) ? player1Lineup : player2Lineup);
+	var lineupIndex = getPlayerLineupIndex(id);
+	if (lineupIndex >= cards.length) {
+		alert("No card is here");
+		return;
+	}
+	var card = cards[lineupIndex];
+	if (card == null) {
+		alert("No card is here");
+		return;
+	}
+	var defeated = (isPlayer1(id) ? player1Standby: player2Standby);
+	defeated.push(card);
+	cards[lineupIndex] = null;
 
+	// redisplay the spot
+	displayCard(id);
 }
 
 /*** PHASE FUNCTIONS ***/
@@ -188,6 +222,7 @@ function displayPlayer2Lineup() {
 }
 
 // i=id# (card1,card2,card3,...)
+// assumes id is input correctly
 function displayCard(i) {
 	var div = document.getElementById("card" + i);
 
@@ -195,6 +230,11 @@ function displayCard(i) {
 	var cards = (isPlayer1(i) ? player1Lineup : player2Lineup);
 	var lineupIndex = getPlayerLineupIndex(i);
 	var card = cards[lineupIndex];
+	if (card == null) {
+		div.innerHTML = "";
+		return;
+	}
+
 	// this is really ugly, but my excuse is that I am a bad programmer
 
 	// this catches for lack of combat actions
