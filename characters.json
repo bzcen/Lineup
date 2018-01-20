@@ -91,7 +91,7 @@ characterDB = {
 			{
 				"id": 12,
 				"name": "Zeus",
-				"level": 2,
+				"level": 5,
 				"imagePath": "images/legion_placeholder.jpg",
 				"combatActions": {
 					"description": "2 DMG to Position 1\n1 DMG to Position 2",
