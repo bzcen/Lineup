@@ -1,5 +1,5 @@
 const phases = ["Place Actions", "Flip Actions", "Combat", "End of Combat", "Resolve Combat", "End of Turn", "Upkeep"];
-var phaseIndex = 0;
+var phaseIndex = -1;
 
 class Character {
 	constructor(name, level, imagePath, combatActions, abilities, factionBonus, hp) {
@@ -49,6 +49,7 @@ window.onload = function() {
 
 	// render HTML of all lineup cards
 	displayLineup();
+	nextPhase();
 };
 
 /*** DECK/LINEUP/HAND CONSTRUCTION FUNCTIONS ***/
@@ -194,7 +195,7 @@ function nextPhase() {
 /*** DISPLAY FUNCTIONS ***/
 
 function displayPhase() {
-	var tag = "Current Phase: ";
+	var tag = "Phase: ";
 	document.getElementById("phase-label").innerHTML = tag + phases[phaseIndex];
 }
 

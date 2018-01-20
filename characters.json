@@ -94,7 +94,7 @@ characterDB = {
 				"level": 5,
 				"imagePath": "images/legion_placeholder.jpg",
 				"combatActions": {
-					"description": "2 DMG to Position 1\n1 DMG to Position 2",
+					"description": "2 DMG to Position 1<br/>1 DMG to Position 2",
 					"details": [
 						{
 							"position": 15,
@@ -120,7 +120,7 @@ characterDB = {
 				"level": 4,
 				"imagePath": "images/whirly_west_placeholder.png",
 				"combatActions": {
-					"description": "Eager: 1 DMG to Position 1/2/3\n1 DMG to Position 1/2/3",
+					"description": "Eager: 1 DMG to Position 1/2/3<br/>1 DMG to Position 1/2/3",
 					"details": [
 						{
 							"position": 15,
@@ -202,7 +202,7 @@ characterDB = {
 				"level": 3,
 				"imagePath": "images/whirly_west_placeholder.png",
 				"combatActions": {
-					"description": "1: 1 DMG to Position 1\n2/3/4: 2 DMG to Position 2",
+					"description": "1: 1 DMG to Position 1<br/>2/3/4: 2 DMG to Position 2",
 					"details": [
 						{
 							"position": 1,
