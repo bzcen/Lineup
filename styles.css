@@ -291,15 +291,52 @@ input {
 	text-align: center;
 }
 
-.standby-modal-content .close:hover,
-.standby-modal-content .close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
 .standby-modal-card-container {
 	display: flex;
+}
+
+.standby-modal {
+	display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+.defeated-modal-content {
+    background-color: crimson;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: thick solid black;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.defeated-modal-header {
+	color: white;
+	font-weight: bold;
+	text-align: center;
+}
+
+.defeated-modal-card-container {
+	display: flex;
+}
+
+.defeated-modal {
+	display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    animation-name: animatetop;
+    animation-duration: 0.4s
 }
 
 	/* animation for modal */

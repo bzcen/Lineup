@@ -22,7 +22,7 @@
 			<div class="lineup-container-header">
 				<input class="show-standby-button" id="show-standby-button1" type="button" value="Show Standby" onclick="showStandbyModal(true)">
 				<h2> Player 1 </h2>
-				<input class="show-defeated-button" id="show-defeated-button2" type="button" value="Show Defeated">
+				<input class="show-defeated-button" id="show-defeated-button2" type="button" value="Show Defeated" onclick="showDefeatedModal(true)">
 			</div>
 			<div class="lineup">
 				<div class="position-container">
@@ -80,7 +80,7 @@
 			<div class="lineup-container-header">
 				<input class="show-standby-button" id="show-standby-button2" type="button" value="Show Standby" onclick="showStandbyModal(false)">
 				<h2> Player 2 </h2>
-				<input class="show-defeated-button" id="show-defeated-button2" type="button" value="Show Defeated">
+				<input class="show-defeated-button" id="show-defeated-button2" type="button" value="Show Defeated" onclick="showDefeatedModal(false)">
 			</div>
 			<div class="lineup">
 				<div class="position-container">
@@ -139,9 +139,18 @@
 <div class="standby-modal" id="standby-modal">
 	<div class="standby-modal-content">
 		<div class="standby-modal-header">
-			<h2> STANDBY POOL </h2>
+			<h2> STANDBY </h2>
 		</div>
 		<div class="standby-modal-card-container" id="standby-modal-card-container"></div>
+	</div>
+</div>
+
+<div class="defeated-modal" id="defeated-modal">
+	<div class="defeated-modal-content">
+		<div class="defeated-modal-header">
+			<h2> DEFEATED </h2>
+		</div>
+		<div class="defeated-modal-card-container" id="defeated-modal-card-container"></div>
 	</div>
 </div>
 

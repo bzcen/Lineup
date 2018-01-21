@@ -55,8 +55,12 @@ window.onload = function() {
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
 	var standby_modal = document.getElementById("standby-modal");
+	var defeated_modal = document.getElementById("defeated-modal");
     if (event.target == standby_modal) {
     	hideStandbyModal();
+    }
+    if (event.target == defeated_modal) {
+    	hideDefeatedModal();
     }
 }
 
@@ -287,6 +291,28 @@ function hideStandbyModal() {
 	var modal = document.getElementById("standby-modal");
 	modal.style.display= "none";
 	var card_container = document.getElementById("standby-modal-card-container");
+	card_container.innerHTML = "";
+
+}
+
+// display Defeated Modal
+function showDefeatedModal(isPlayer1) {
+	var modal = document.getElementById("defeated-modal");
+	modal.style.display = "block";
+
+	var defeated = (isPlayer1 ? player1Defeated : player2Defeated);
+	var card_container = document.getElementById("defeated-modal-card-container");
+
+	for (var i = 0; i < defeated.length; i++) {
+		card_container.innerHTML += "<div class=\"card-container\">" + getCardDisplayHTML(defeated[i]) + "</div>";
+	}
+}
+
+// hide Defeated Modal
+function hideDefeatedModal() {
+	var modal = document.getElementById("defeated-modal");
+	modal.style.display= "none";
+	var card_container = document.getElementById("defeated-modal-card-container");
 	card_container.innerHTML = "";
 
 }
