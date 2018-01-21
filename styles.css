@@ -251,16 +251,19 @@ body {
 input {
 
 }
-#next-phase {
-	background: blue;
+.sidebar-button-row {
+	display: flex;
+}
+.sidebar-button {
+	background: mediumpurple;
   	border: none;
   	color: white;
   	text-transform: uppercase;
-  	width: 100px;
-  	height: 45px;
+  	flex: 1;
   	outline: 0;
   	cursor: pointer;
-  	margin-bottom: 10px;
+  	height: 30px;
+  	margin: 5px 5px;
 }
 
 /* Modals */
