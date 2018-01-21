@@ -52,6 +52,14 @@ window.onload = function() {
 	nextPhase();
 };
 
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+	var standby_modal = document.getElementById("standby-modal");
+    if (event.target == standby_modal) {
+    	hideStandbyModal();
+    }
+}
+
 /*** DECK/LINEUP/HAND CONSTRUCTION FUNCTIONS ***/
 
 // will actual create the new card instance
@@ -235,9 +243,11 @@ function displayCard(i) {
 		div.innerHTML = "";
 		return;
 	}
+	div.innerHTML = getCardDisplayHTML(card);
+}
 
-	// this is really ugly, but my excuse is that I am a bad programmer
-
+// Get card HTML string
+function getCardDisplayHTML(card) {
 	// this catches for lack of combat actions
 	var combatActionsText = (card.combatActions != null ? card.combatActions.description : "");
 	var abilitiesText = (card.hasOwnProperty("abilities") ? card.abilities : "");
@@ -254,7 +264,31 @@ function displayCard(i) {
 		"<dmgHeader>DMG: " + card.dmg + "</dmgHeader>"
 	;
 
-	div.innerHTML = htmlString;
+	return htmlString;
+}
+
+/*** MODAL FUNCTIONS ***/
+
+// display Standby Modal
+function showStandbyModal(isPlayer1) {
+	var modal = document.getElementById("standby-modal");
+	modal.style.display = "block";
+
+	var standby = (isPlayer1 ? player1Standby : player2Standby);
+	var card_container = document.getElementById("standby-modal-card-container");
+
+	for (var i = 0; i < standby.length; i++) {
+		card_container.innerHTML += "<div class=\"card-container\">" + getCardDisplayHTML(standby[i]) + "</div>";
+	}
+}
+
+// hide Standby Modal
+function hideStandbyModal() {
+	var modal = document.getElementById("standby-modal");
+	modal.style.display= "none";
+	var card_container = document.getElementById("standby-modal-card-container");
+	card_container.innerHTML = "";
+
 }
 
 /*** OTHER HELPER FUNCTIONS ***/
