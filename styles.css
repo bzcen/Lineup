@@ -51,6 +51,7 @@ body {
 	text-align: center;
 	flex: 1;
 	margin: 10px;
+	font-family: courier;
 }
 
 /* some personal practice using CSS flexbox */
@@ -225,27 +226,36 @@ body {
 	display: block;
 }
 
-.show-standby-button {
+input[class$="header-button"] {
 	flex: 0.2;
 	font-weight: bold;
 	font-size: 13px;
 	cursor: pointer;
-	background: limegreen;
 	text-transform: uppercase;
   	height: 45px;
   	margin: 0 10px;
 }
 
-.show-defeated-button {
-	flex: 0.2;
-	font-weight: bold;
-	font-size: 13px;
-	cursor: pointer;
+.show-standby-header-button {
+	background: limegreen;
+}
+
+.show-defeated-header-button {
 	background: crimson;
-	text-transform: uppercase;
-  	height: 45px;
-  	margin: 0 10px;
   	color: white;
+}
+
+.swap-container {
+	flex: 0.3;
+	display: flex;
+}
+
+.swap-button {
+	flex: 1;
+}
+
+.swap-position-field {
+	flex: 1;
 }
 
 input {

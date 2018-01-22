@@ -114,6 +114,10 @@ function constructCharacterFromDB(cardName) {
 
 function addDmg(id) {
 	var fieldValue = document.getElementById("edit-dmg-field" + id).value;
+	if (fieldValue == "") {
+		alert("Input a number");
+		return;
+	}
 
 	var num = Number(fieldValue);
 	if (num == NaN) {
@@ -194,6 +198,55 @@ function moveToStandby(id) {
 
 	// redisplay the spot
 	displayCard(id);
+}
+
+function swapPositions(isPlayer1) {
+	var fieldA, fieldB;
+	if (isPlayer1) {
+		fieldA = document.getElementById("swap-position-field1-1");
+		fieldB = document.getElementById("swap-position-field1-2");
+	} else {
+		fieldA = document.getElementById("swap-position-field2-1");
+		fieldB = document.getElementById("swap-position-field2-2");
+	}
+	if (fieldA.value == "" || fieldB.value == "") {
+		alert("Missing number(s)");
+		return;
+	}
+
+	var posA = Number(fieldA.value);
+	var posB = Number(fieldB.value);
+	if (posA == NaN || posB == NaN) {
+		alert("Missing number(s)");
+		return;
+	}
+	if (posA%1!=0 || posB%1!=0) {
+		alert("Input whole number(s)");
+		fieldA.value = "";
+		fieldB.value = "";
+		return;
+	}
+	if (posA < 1 || posA >=5 || posB < 1 || posB >=5) {
+		alert("Input number(s) between 1 and 5");
+		fieldA.value = "";
+		fieldB.value = "";
+		return;
+	}
+	var indexA = posA-1;
+	var indexB = posB-1;
+
+	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
+	// perform the swap
+	var temp = lineup[indexA];
+	lineup[indexA] = lineup[indexB];
+	lineup[indexB] = temp;
+
+	displayCard(getCardId(isPlayer1, indexA));
+	displayCard(getCardId(isPlayer1, indexB));
+
+	fieldA.value = "";
+	fieldB.value = "";
+	return;
 }
 
 /*** PHASE FUNCTIONS ***/
@@ -330,4 +383,10 @@ function getPlayerLineupIndex(id) {
 	// keep in mind things are 0-based indexes in the arrays themselves though
 	var fixedIds = [3, 2, 1, 0];
 	return (isPlayer1(id) ? fixedIds[id-1] : id-5);
+}
+
+// returns the id given a player lineup index
+function getCardId(isPlayer1, index) {
+	var fixedIds = [4, 3, 2, 1];
+	return (isPlayer1 ? fixedIds[index] : index+5);
 }
