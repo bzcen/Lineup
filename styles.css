@@ -101,8 +101,9 @@ body {
 	background: white;
 	margin: 10px;
 	/** has sum to 190 to fit 200px width position container*/
-	width: 190px;
+	width: 180px;
 	text-align: center;
+	border: 5px solid black;
 }
 
 /* use of flex in order to fill horizontal space between name and level */
@@ -316,4 +317,47 @@ div[class$="modal-card-container"] {
 @keyframes animatetop {
     from {top: -300px; opacity: 0}
     to {top: 0; opacity: 1}
+}
+
+/* Card Menu */
+.card-menu {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  padding: 12px 0;
+  width: 150px;
+  background-color: #fff;
+  border: solid 1px #dfdfdf;
+  box-shadow: 1px 1px 2px #cfcfcf;
+}
+
+.card-menu--active {
+	display: block;
+}
+
+.card-menu-items {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.card-menu-item {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.card-menu-item:last-child {
+  margin-bottom: 0;
+}
+
+.card-menu-link {
+  display: block;
+  padding: 4px 12px;
+  color: #0066aa;
+  text-decoration: none;
+}
+
+.card-menu-link:hover {
+  color: #fff;
+  background-color: #0066aa;
 }
