@@ -59,7 +59,7 @@ window.onload = function() {
 
 	// temporary
 	for (var i = 0; i < player1Cards.length; i++) {
-		moveCardToLineup(player1Cards[i]);
+		moveCardToLineup(player1Cards[i], i);
 	}
 
 	pushCardToTotal("Remus", false);
@@ -69,7 +69,7 @@ window.onload = function() {
 
 	// temporary
 	for (var i = 0; i < player2Cards.length; i++) {
-		moveCardToLineup(player2Cards[i]);
+		moveCardToLineup(player2Cards[i], i);
 	}
 
 	// render HTML of all lineup cards
@@ -250,7 +250,8 @@ function removeCardFromCurrentArray(card) {
 	card.array = null;
 }
 
-// general purpose function that pushes a card to another array, editing the index and arrayString attributes
+// general purpose function that moves a card to another array, editing the index and arrayString attributes
+// should NOT be used for moving to the lineup
 // NOTE: this removes the card from its previous spot
 function moveCardToArray(card, arrayString) {
 	if (card == null) {
@@ -260,9 +261,6 @@ function moveCardToArray(card, arrayString) {
 
 	var arrayToAddTo;
 	switch (arrayString) {
-		case "lineup":
-			arrayToAddTo = (card.isPlayer1 ? player1Lineup : player2Lineup);
-			break;
 		case "defeated":
 			arrayToAddTo = (card.isPlayer1 ? player1Defeated : player2Defeated);
 			break;
@@ -270,7 +268,7 @@ function moveCardToArray(card, arrayString) {
 			arrayToAddTo = (card.isPlayer1 ? player1Standby : player2Standby);
 			break;
 		default:
-			console.log("moveCardToArray - ERROR: unrecognized arrayString");
+			console.log("moveCardToArray - ERROR: unrecognized or banned arrayString");
 			return;
 	}
 
@@ -284,9 +282,29 @@ function moveCardToArray(card, arrayString) {
 	arrayToAddTo.push(card);
 }
 
-// pushes a card by reference into the correct lineup
-function moveCardToLineup(card) {
-	moveCardToArray(card, "lineup");
+// need to be a little more special about this cause its needs a posIndex
+function moveCardToLineup(card, posIndex) {
+	if (card == null) {
+		console.log("moveCardToLineup - ERROR: tried to move null card");
+		return;
+	}
+	if (posIndex >= 4) {
+		console.log("moveCardToLineup - ERROR: invalid posIndex");
+		return;
+	}
+
+	var lineupToAddTo = (card.isPlayer1 ? player1Lineup : player2Lineup);
+	if (lineupToAddTo[posIndex] != null) {
+		console.log("moveCardToLineup - ERROR: card is in the way");
+		return;
+	}
+
+	if (card.array != null) {
+		removeCardFromCurrentArray(card);
+	}
+	card.array = "lineup";
+	card.arrayIndex = posIndex;
+	lineupToAddTo[posIndex] = card;
 }
 
 // pushes a card by reference into a defeated pool
@@ -437,10 +455,20 @@ function slideLineups() {
 
 function slideLineup(isPlayer1) {
 	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
-	// essentially bubble everything down
-	for (var i = 0; i < 4; i++) {
+	// essentially bubble everything down (can skip the first)
+	for (var i = 1; i < 4; i++) {
+		// skip if there's no card at this spot
+		if (lineup[i] == null) continue;
 
+		// keep on moving the card down the lineup
+		var j = i;
+		while (j > 0 && lineup[j-1] == null) {
+			moveCardToLineup(lineup[j], j-1);
+			j--;
+		}
 	}
+	if (isPlayer1) displayPlayer1Lineup();
+	else displayPlayer2Lineup();
 }
 
 /*** PHASE FUNCTIONS ***/
