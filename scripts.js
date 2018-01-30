@@ -50,6 +50,8 @@ var player2Defeated = [];
 // TODO(bcen): follow this guide for how to fix resize issues with context menus
 // https://www.sitepoint.com/building-custom-right-click-context-menu-javascript/
 
+// TODO(bcen): need some sort of protection of adding nulls to a <4 player lineup
+
 // on load, render cards
 window.onload = function() {
 	pushCardToTotal("Renegade Rick", true);
@@ -341,6 +343,58 @@ function moveCardToStandby(card) {
 	moveCardToArray(card, "standby");
 }
 
+// general function for moving 
+function moveToStandby(startArray, startIndex, isPlayer1) {
+	// can't be out of bounds
+	if (startIndex >= startArray.length) {
+		console.log("moveToStandby - ERROR: tried to access bad index in array");
+		return;
+	}
+	// can't be empty
+	var card = startArray[startIndex];
+	console.log("moveToStandby - ERROR: tried to access bad index in array");
+	if (card == null) { 
+		return;
+	}
+}
+
+// slides both lineups towards Pos 0
+function slideLineups() {
+	slideLineup(true);
+	slideLineup(false);
+}
+
+function slideLineup(isPlayer1) {
+	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
+	// essentially bubble everything down (can skip the first)
+	for (var i = 1; i < 4; i++) {
+		// skip if there's no card at this spot
+		if (lineup[i] == null) continue;
+
+		// keep on moving the card down the lineup
+		var j = i;
+		while (j > 0 && lineup[j-1] == null) {
+			moveCardToLineup(lineup[j], j-1);
+			j--;
+		}
+	}
+	if (isPlayer1) displayPlayer1Lineup();
+	else displayPlayer2Lineup();
+}
+
+function removeDefeatedFromLineups() {
+	for (var i = 0; i < player1Lineup.length; i++) {
+		var card = player1Lineup[i];
+		if (card != null && card.dmg >= card.hp) moveCardToDefeated(card);
+	}
+
+	for (var i = 0; i < player2Lineup.length; i++) {
+		var card = player2Lineup[i];
+		if (card != null && card.dmg >= card.hp) moveCardToDefeated(card);
+	}
+	displayLineup();
+}
+
 function constructCharacterFromDB(cardName) {
 	var factions = characterDB["factions"];
 	// iterate through properties of factions object (aka each faction)
@@ -361,6 +415,55 @@ function constructCharacterFromDB(cardName) {
 function addDmg(card, dmg) {
 	card.dmg = card.dmg + dmg;
 	if (card.dmg < 0) card.dmg = 0;
+}
+
+// applies the combat actions of all cards in both lineups
+function combatActions() {
+	for (var i = 0; i < player1Lineup.length; i++) {
+		var card = player1Lineup[i];
+		if (card != null) applyCombatAction(card);
+	}
+
+	for (var i = 0; i < player2Lineup.length; i++) {
+		var card = player2Lineup[i];
+		if (card != null) applyCombatAction(card);
+	}
+
+	displayLineup();
+}
+
+// apply the combat damage of an individual card
+function applyCombatAction(card) {
+	if (card == null) {
+		console.log("applyCombatAction - ERROR: card is null");
+		return;
+	}
+	if (card.array != "lineup") {
+		console.log("applyCombatAction - ERROR: card is not in lineup");
+		return;
+	}
+	// do nothing in the case where a card has no combat actions
+	if (card.combatActions == null) {
+		return;
+	}
+
+	var lineupToAttack = (card.isPlayer1 ? player2Lineup : player1Lineup);
+	var actions = card.combatActions.details;
+	for (var i = 0; i < actions.length; i++) {
+		var action = actions[i];
+		var attackingPositions = getValidPositions(action.position);
+		// don't do anything if the card isn't in the right position
+		if (!attackingPositions[card.arrayIndex]) continue;
+
+		// apply damage to every targetted position
+		var attackedPositions = getValidPositions(action.target);
+		for (var j = 0; j < attackedPositions.length; j++) {
+			if (attackedPositions[j] && lineupToAttack[j] != null) {
+				addDmg(lineupToAttack[j], action.dmg);
+			}
+		}
+	}
+	displayLineup();
 }
 
 /*** FUNCTIONS CALLED FROM MAIN HTML COMPONENT aka Combat Field ***/
@@ -453,47 +556,6 @@ function addDmgFromCombatField(id) {
 	// redisplay the card with the modified DMG value
 	displayCard(id);
 	document.getElementById("edit-dmg-field" + id).value = "";
-}
-
-/*** CHARACTER CARD MOVEMENT FUNCTIONS ***/
-
-// general function for moving 
-function moveToStandby(startArray, startIndex, isPlayer1) {
-	// can't be out of bounds
-	if (startIndex >= startArray.length) {
-		console.log("moveToStandby - ERROR: tried to access bad index in array");
-		return;
-	}
-	// can't be empty
-	var card = startArray[startIndex];
-	console.log("moveToStandby - ERROR: tried to access bad index in array");
-	if (card == null) { 
-		return;
-	}
-}
-
-// slides both lineups towards Pos 0
-function slideLineups() {
-	slideLineup(true);
-	slideLineup(false);
-}
-
-function slideLineup(isPlayer1) {
-	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
-	// essentially bubble everything down (can skip the first)
-	for (var i = 1; i < 4; i++) {
-		// skip if there's no card at this spot
-		if (lineup[i] == null) continue;
-
-		// keep on moving the card down the lineup
-		var j = i;
-		while (j > 0 && lineup[j-1] == null) {
-			moveCardToLineup(lineup[j], j-1);
-			j--;
-		}
-	}
-	if (isPlayer1) displayPlayer1Lineup();
-	else displayPlayer2Lineup();
 }
 
 /*** PHASE FUNCTIONS ***/
@@ -616,7 +678,6 @@ function hideDefeatedModal() {
 	modal.style.display= "none";
 	var card_container = document.getElementById("defeated-modal-card-container");
 	card_container.innerHTML = "";
-
 }
 
 /*** CARD MENU FUNCTIONS ***/
@@ -718,6 +779,19 @@ function cleanArray(array) {
 	// fix indexes
 	for (var i = 0; i < array.length; i++) {
 		array[i].arrayIndex = i;
+	}
+	return array;
+}
+
+// helper that returns a new boolean array representing which positions are valid
+// we store these valid positions as a number in JSON
+function getValidPositions(num) {
+	var array = [];
+	for (var i = 0; i < 4; i++) {
+		if (num%2 == 1) array.push(true);
+		else array.push(false);
+
+		num = Math.floor(num/2);
 	}
 	return array;
 }
