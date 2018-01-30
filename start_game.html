@@ -7,19 +7,10 @@
 </head>
 
 <body>
-<div class="sidebar">
-	<div class="sidebar-content">
-		<h2> Lineup </h2>
-		<p id="phase-label"></p>
-		<div class="sidebar-button-bar">
-			<input class="sidebar-button" id="next-phase" type="button" value="Next Phase" onclick="nextPhase()">
-			<input class="sidebar-button" id="slide-lineups" type="button" value="Slide Lineups" onclick="slideLineups()">
-			<input class="sidebar-button" id="combat-actions" type="button" value="Combat Actions" onclick="combatActions()">
-			<input class="sidebar-button" id="remove-defeated" type="button" value="Remove Defeated" onclick="removeDefeatedFromLineups()">
-		</div>
-		<div class="log" id="log">testest</div>
-	</div>
+<div class="main-header">
+	<h2> Lineup </h2>
 </div>
+
 <div class="main-content">
 	<div class="combat-field" id="combat-field">
 		<!-- Player 1 Lineup -->
@@ -77,6 +68,8 @@
 				</div>
 			</div>
 		</div>
+		<!-- dividing line -->
+		<div class="vertical-divider"></div>
 		<!-- Player 2 Lineup -->
 		<div class="lineup-container">
 			<div class="lineup-container-header">
@@ -131,6 +124,25 @@
 					</div>
 				</div>
 			</div>
+		</div>
+	</div>
+</div>
+
+<div class="bottom-bar">
+	<div class="action-log" id="action-log">
+	</div>
+	<div class="control-panel">
+		<div class="header">
+			<h3> Control Panel </h3>
+			<p id="phase-label"></p>
+		</div>
+		<div class="row">
+			<input class="button" id="next-phase" type="button" value="Next Phase" onclick="nextPhase()">
+			<input class="button" id="slide-lineups" type="button" value="Slide Lineups" onclick="slideLineups()">
+		</div>
+		<div class="row">
+			<input class="button" id="combat-actions" type="button" value="Combat Actions" onclick="combatActions()">
+			<input class="button" id="remove-defeated" type="button" value="Remove Defeated" onclick="removeDefeatedFromLineups()">
 		</div>
 	</div>
 </div>

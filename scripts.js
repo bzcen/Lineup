@@ -569,7 +569,7 @@ function nextPhase() {
 /*** DISPLAY FUNCTIONS ***/
 
 function displayPhase() {
-	var tag = "Phase: ";
+	var tag = "Current Phase: ";
 	document.getElementById("phase-label").innerHTML = tag + phases[phaseIndex];
 }
 
