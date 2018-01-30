@@ -645,7 +645,7 @@ function showStandbyModal(isPlayer1) {
 
 	card_container.innerHTML = "";
 	for (var i = 0; i < standby.length; i++) {
-		card_container.innerHTML += getCardDisplayHTML(standby[i]);
+		card_container.innerHTML += "<div class=\"card-outer-container\">" + getCardDisplayHTML(standby[i]) + "</div>";
 	}
 }
 
@@ -668,7 +668,7 @@ function showDefeatedModal(isPlayer1) {
 
 	card_container.innerHTML = "";
 	for (var i = 0; i < defeated.length; i++) {
-		card_container.innerHTML += getCardDisplayHTML(defeated[i]);
+		card_container.innerHTML += "<div class=\"card-outer-container\">" + getCardDisplayHTML(defeated[i]) + "</div>";
 	}
 }
 
@@ -678,6 +678,14 @@ function hideDefeatedModal() {
 	modal.style.display= "none";
 	var card_container = document.getElementById("defeated-modal-card-container");
 	card_container.innerHTML = "";
+}
+
+function showActionsModal() {
+
+}
+
+function hideActionsModal() {
+
 }
 
 /*** CARD MENU FUNCTIONS ***/

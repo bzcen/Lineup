@@ -97,6 +97,14 @@
 	background: powderblue;
 }
 
+/* only used by modals to give a fixed width to cards without being in
+   a position container */
+.card-outer-container {
+ 	width: 155px;
+ 	margin-left: 5px;
+ 	margin-right: 5px;
+}
+
 .card-container {
 	background: white;
 	flex: 1;
@@ -331,11 +339,15 @@ div[class$="modal-card-container"] {
 }
 
 .standby-modal-content {
-    background-color: limegreen;
+    background-color: lightgreen;
 }
 
 .defeated-modal-content {
-    background-color: crimson;
+    background-color: firebrick;
+}
+
+.actions-modal-content {
+	background-color: orchid;
 }
 
 	/* animation for modal */
