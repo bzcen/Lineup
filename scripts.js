@@ -195,11 +195,23 @@ function cardMenuLinkListener(link) {
 	var card_id = cardInContext.getAttribute("card-local-id");
 	var menu_action = link.getAttribute("menu-action");
 
-	if (menu_action == "move-to-standby") {
-		moveToStandbyByCardMenu(card_id);
-	} else if (menu_action == "move-to-defeated") {
-		moveToDefeatedByCardMenu(card_id);
+	switch (menu_action) {
+		case "move-to-standby":
+			moveToStandbyByCardMenu(card_id);
+			break;
+		case "move-to-defeated":
+			moveToDefeatedByCardMenu(card_id);
+			break;
+		case "add-1-dmg":
+			add1DmgByCardMenu(card_id);
+			break;
+		case "remove-1-dmg":
+			remove1DmgByCardMenu(card_id);
+			break;
+		default:
+			break;
 	}
+
 	toggleCardMenuOff();
 }
 
@@ -336,6 +348,7 @@ function constructCharacterFromDB(cardName) {
 
 function addDmg(card, dmg) {
 	card.dmg = card.dmg + dmg;
+	if (card.dmg < 0) card.dmg = 0;
 }
 
 /*** FUNCTIONS CALLED FROM MAIN HTML COMPONENT aka Combat Field ***/
@@ -634,6 +647,27 @@ function moveToDefeatedByCardMenu(localId) {
 		showStandbyModal(card.isPlayer1);
 	}
 }
+
+function add1DmgByCardMenu(localId) {
+	var card = getCardFromLocalId(localId);
+	if (card == null) {
+		console.log("add1DmgByCardMenu - ERROR: cannot find card by local id");
+		return;
+	}
+	addDmg(card, 1);
+	displayLineup();
+}
+
+function remove1DmgByCardMenu(localId) {
+	var card = getCardFromLocalId(localId);
+	if (card == null) {
+		console.log("remove1DmgByCardMenu - ERROR: cannot find card by local id");
+		return;
+	}
+	addDmg(card, -1);
+	displayLineup();
+}
+
 
 /*** OTHER HELPER FUNCTIONS ***/
 
