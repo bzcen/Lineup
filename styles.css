@@ -212,16 +212,21 @@ input[class$="header-button"] {
 }
 
 .show-standby-header-button {
-	background: limegreen;
+	background: lightgreen;
 }
 
 .show-defeated-header-button {
-	background: crimson;
+	background: firebrick;
   	color: white;
 }
 
+.show-actions-header-button {
+	background: orchid;
+	color: white;
+}
+
 .swap-container {
-	flex: 0.3;
+	flex: 0.2;
 	display: flex;
 }
 
@@ -241,6 +246,7 @@ input[class$="header-button"] {
 	align-items: stretch;
 	width: 100%;
 	height: 135px;
+	border-bottom: thick solid black;
 }
 
 .bottom-bar .control-panel {
@@ -249,7 +255,6 @@ input[class$="header-button"] {
 	flex-direction: column;
 	border-left: thick solid black;
 	height: 100%;
-	border-bottom: thick solid black;
 }
 
 .bottom-bar .control-panel p {
