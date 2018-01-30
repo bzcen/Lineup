@@ -196,6 +196,18 @@ function cardMenuLinkListener(link) {
 	var menu_action = link.getAttribute("menu-action");
 
 	switch (menu_action) {
+		case "move-to-pos-1":
+			moveToLineupByCardMenu(card_id, 0);
+			break;
+		case "move-to-pos-2":
+			moveToLineupByCardMenu(card_id, 1);
+			break;
+		case "move-to-pos-3":
+			moveToLineupByCardMenu(card_id, 2);
+			break;
+		case "move-to-pos-4":
+			moveToLineupByCardMenu(card_id, 3);
+			break;
 		case "move-to-standby":
 			moveToStandbyByCardMenu(card_id);
 			break;
@@ -609,6 +621,22 @@ function hideDefeatedModal() {
 
 /*** CARD MENU FUNCTIONS ***/
 
+// moves a card with localId to a position on the lineup
+function moveToLineupByCardMenu(localId, posIndex) {
+	var card = getCardFromLocalId(localId);
+	if (card == null) {
+		console.log("moveToLineupByCardMenu - ERROR: cannot find card by local id");
+		return;
+	}
+	var originArray = card.array;
+
+	moveCardToLineup(card, posIndex);
+	displayLineup();
+
+	if (originArray == "standby") showStandbyModal(card.isPlayer1);
+	else if (originArray == "defeated") showDefeatedModal(card.isPlayer1);
+}
+
 // moves a card with localId to standby
 function moveToStandbyByCardMenu(localId) {
 	var card = getCardFromLocalId(localId);
@@ -619,6 +647,7 @@ function moveToStandbyByCardMenu(localId) {
 
 	var originArray = card.array;
 	if (originArray == "standby") return;
+
 	moveCardToStandby(card);
 	if (originArray == "lineup") {
 		displayLineup();
@@ -636,9 +665,8 @@ function moveToDefeatedByCardMenu(localId) {
 		return;
 	}
 	var originArray = card.array;
-	if (originArray == "defeated") {
-		return;
-	}
+	if (originArray == "defeated") return;
+
 	moveCardToDefeated(card);
 	if (originArray == "lineup") {
 		displayLineup();
@@ -684,6 +712,7 @@ function getCardFromLocalId(localId) {
 }
 
 // helper to remove null spots in the card array index
+// returns a newly allocated array, so it needs to be assigned outside
 function cleanArray(array) {
 	array = array.filter(n=>n);
 	// fix indexes
