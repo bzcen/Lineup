@@ -59,7 +59,7 @@ window.onload = function() {
 
 	// temporary
 	for (var i = 0; i < player1Cards.length; i++) {
-		pushCardToLineup(player1Cards[i], true);
+		moveCardToLineup(player1Cards[i]);
 	}
 
 	pushCardToTotal("Remus", false);
@@ -69,7 +69,7 @@ window.onload = function() {
 
 	// temporary
 	for (var i = 0; i < player2Cards.length; i++) {
-		pushCardToLineup(player2Cards[i], false);
+		moveCardToLineup(player2Cards[i]);
 	}
 
 	// render HTML of all lineup cards
@@ -205,7 +205,7 @@ function cardMenuLinkListener(link) {
 
 /*** DECK/LINEUP/HAND CONSTRUCTION FUNCTIONS ***/
 
-// will actual create the new card instance
+// will actual create the new card instance, stores it in total cards (which doesn't get modified)
 function pushCardToTotal(cardName, isPlayer1) {
 	var arrayToAddTo = (isPlayer1 ? player1Cards : player2Cards);
 
@@ -214,31 +214,89 @@ function pushCardToTotal(cardName, isPlayer1) {
 	arrayToAddTo.push(character);
 }
 
-// pushes a card by reference into a lineup
-function pushCardToLineup(card, isPlayer1) {
-	if (card == null) return;
-	var arrayToAddTo = (isPlayer1 ? player1Lineup : player2Lineup);
-	card.array = "lineup";
+// general purpose function that removes a card from the current array it resides in, editing the index and arrayString attributes
+function removeCardFromCurrentArray(card) {
+	if (card == null) {
+		console.log("removeCardFromCurrentArray - ERROR: tried to remove null card");
+		return;
+	}
+	if (card.array == null) {
+		console.log("removeCardFromCurrentArray - ERROR: tried to remove card that was not in any zone");
+		return;
+	}
+
+	if (card.array == "lineup") {
+		var lineup = (card.isPlayer1 ? player1Lineup : player2Lineup);
+		lineup[card.arrayIndex] = null;
+	}
+	else if (card.array == "defeated") {
+		var defeated = (card.isPlayer1 ? player1Defeated : player2Defeated);
+		defeated[card.arrayIndex] = null;
+		if (card.isPlayer1) {
+			player1Defeated = cleanArray(defeated);
+		} else {
+			player2Defeated = cleanArray(defeated);
+		}
+	}
+	else if (card.array == "standby") {
+		var standby = (card.isPlayer1 ? player1Standby : player2Standby);
+		standby[card.arrayIndex] = null;
+		if (card.isPlayer1) {
+			player1Standby = cleanArray(standby);
+		} else {
+			player2Standby = cleanArray(standby);
+		}
+	}
+	card.array = null;
+}
+
+// general purpose function that pushes a card to another array, editing the index and arrayString attributes
+// NOTE: this removes the card from its previous spot
+function moveCardToArray(card, arrayString) {
+	if (card == null) {
+		console.log("moveCardToArray - ERROR: tried to push null card to an array");
+		return;
+	}
+
+	var arrayToAddTo;
+	switch (arrayString) {
+		case "lineup":
+			arrayToAddTo = (card.isPlayer1 ? player1Lineup : player2Lineup);
+			break;
+		case "defeated":
+			arrayToAddTo = (card.isPlayer1 ? player1Defeated : player2Defeated);
+			break;
+		case "standby":
+			arrayToAddTo = (card.isPlayer1 ? player1Standby : player2Standby);
+			break;
+		default:
+			console.log("moveCardToArray - ERROR: unrecognized arrayString");
+			return;
+	}
+
+	// remove the card from its original home
+	if (card.array != null) {
+		removeCardFromCurrentArray(card);
+	}
+
+	card.array = arrayString;
 	card.arrayIndex = arrayToAddTo.length;
 	arrayToAddTo.push(card);
+}
+
+// pushes a card by reference into the correct lineup
+function moveCardToLineup(card) {
+	moveCardToArray(card, "lineup");
 }
 
 // pushes a card by reference into a defeated pool
-function pushCardToDefeated(card, isPlayer1) {
-	if (card == null) return;
-	var arrayToAddTo = (isPlayer1 ? player1Defeated : player2Defeated);
-	card.array = "defeated";
-	card.arrayIndex = arrayToAddTo.length;
-	arrayToAddTo.push(card);
+function moveCardToDefeated(card) {
+	moveCardToArray(card, "defeated");
 }
 
 // pushes a card by reference into a standby pool
-function pushCardToStandby(card, isPlayer1) {
-	if (card == null) return;
-	var arrayToAddTo = (isPlayer1 ? player1Standby : player2Standby);
-	card.array = "standby";
-	card.arrayIndex = arrayToAddTo.length;
-	arrayToAddTo.push(card);
+function moveCardToStandby(card) {
+	moveCardToArray(card, "standby");
 }
 
 function constructCharacterFromDB(cardName) {
@@ -258,142 +316,11 @@ function constructCharacterFromDB(cardName) {
 
 /*** DMG FUNCTIONS ***/
 
-function addDmg(id) {
-	var fieldValue = document.getElementById("edit-dmg-field" + id).value;
-	if (fieldValue == "") {
-		alert("Input a number");
-		return;
-	}
-
-	var num = Number(fieldValue);
-	if (num == NaN) {
-		alert("Input a number");
-		document.getElementById("edit-dmg-field" + id).value = "";
-		return;
-	}
-	if (num%1!=0) {
-		alert("Input a whole number");
-		document.getElementById("edit-dmg-field" + id).value = "";
-		return;
-	}
-
-	// grab the array by reference of which player's cards we're dealing with
-	var cards = (isPlayer1(id) ? player1Lineup : player2Lineup);
-	var lineupIndex = getPlayerLineupIndex(id);
-	if (lineupIndex >= cards.length) {
-		alert("No card is here");
-		document.getElementById("edit-dmg-field" + id).value = "";
-		return;
-	}
-	var card = cards[lineupIndex];
-	if (card == null) {
-		alert("No card is here");
-		document.getElementById("edit-dmg-field" + id).value = "";
-		return;
-	}
-
-	card.dmg = card.dmg + num;
-
-	// redisplay the card with the modified DMG value
-	displayCard(id);
-	document.getElementById("edit-dmg-field" + id).value = "";
+function addDmg(card, dmg) {
+	card.dmg = card.dmg + dmg;
 }
 
-/*** LINEUP MOVEMENT FUNCTIONS ***/
-
-// moves a card located at id in lineup to corresponding player's defeated pool
-function moveToDefeated(id) {
-	// grab the array by reference of which player's cards we're dealing with
-	var cards = (isPlayer1(id) ? player1Lineup : player2Lineup);
-	var lineupIndex = getPlayerLineupIndex(id);
-	if (lineupIndex >= cards.length) {
-		alert("No card is here");
-		return;
-	}
-	var card = cards[lineupIndex];
-	if (card == null) {
-		alert("No card is here");
-		return;
-	}
-	var defeated = (isPlayer1(id) ? player1Defeated: player2Defeated);
-	defeated.push(card);
-	cards[lineupIndex] = null;
-
-	// redisplay the spot
-	displayCard(id);
-}
-
-// moves a card with localId to standby
-function moveToStandbyByCardMenu(localId) {
-	var card = getCardFromLocalId(localId);
-	if (card.array == "standby") return;
-	var isPlayer1 = card.isPlayer1;
-
-	if (card.array == "lineup") {
-		var lineup = (card.isPlayer1 ? player1Lineup : player2Lineup);
-		lineup[card.arrayIndex] = null;
-		pushCardToStandby(card, card.isPlayer1);
-		displayLineup();
-	}
-	else if (card.array == "defeated") {
-		var defeated = (card.isPlayer1 ? player1Defeated : player2Defeated);
-		defeated[card.arrayIndex] = null;
-		if (card.isPlayer1) {
-			player1Defeated = cleanArray(defeated);
-		} else {
-			player2Defeated = cleanArray(defeated);
-		}
-		pushCardToStandby(card, card.isPlayer1);
-		showDefeatedModal(card.isPlayer1);
-	}
-}
-
-// moves a card with localId to defeated
-function moveToDefeatedByCardMenu(localId) {
-	var card = getCardFromLocalId(localId);
-	if (card.array == "defeated") return;
-	var isPlayer1 = card.isPlayer1;
-
-	if (card.array == "lineup") {
-		var lineup = (card.isPlayer1 ? player1Lineup : player2Lineup);
-		lineup[card.arrayIndex] = null;
-		pushCardToDefeated(card, card.isPlayer1);
-		displayLineup();
-	}
-	else if (card.array == "standby") {
-		var standby = (card.isPlayer1 ? player1Standby : player2Standby);
-		standby[card.arrayIndex] = null;
-		if (card.isPlayer1) {
-			player1Standby = cleanArray(standby);
-		} else {
-			player2Standby = cleanArray(standby);
-		}
-		pushCardToDefeated(card, card.isPlayer1);
-		showStandbyModal(card.isPlayer1);
-	}
-}
-
-// moves a card located at id in lineup to corresponding player's standby pool
-function moveToStandby(id) {
-	// grab the array by reference of which player's cards we're dealing with
-	var cards = (isPlayer1(id) ? player1Lineup : player2Lineup);
-	var lineupIndex = getPlayerLineupIndex(id);
-	if (lineupIndex >= cards.length) {
-		alert("No card is here");
-		return;
-	}
-	var card = cards[lineupIndex];
-	if (card == null) {
-		alert("No card is here");
-		return;
-	}
-	var standby = (isPlayer1(id) ? player1Standby: player2Standby);
-	standby.push(card);
-	cards[lineupIndex] = null;
-
-	// redisplay the spot
-	displayCard(id);
-}
+/*** FUNCTIONS CALLED FROM MAIN HTML COMPONENT aka Combat Field ***/
 
 function swapPositions(isPlayer1) {
 	var fieldA, fieldB;
@@ -444,6 +371,78 @@ function swapPositions(isPlayer1) {
 	return;
 }
 
+function addDmgFromCombatField(id) {
+	var fieldValue = document.getElementById("edit-dmg-field" + id).value;
+	if (fieldValue == "") {
+		alert("Input a number");
+		return;
+	}
+
+	var num = Number(fieldValue);
+	if (num == NaN) {
+		alert("Input a number");
+		document.getElementById("edit-dmg-field" + id).value = "";
+		return;
+	}
+	if (num%1!=0) {
+		alert("Input a whole number");
+		document.getElementById("edit-dmg-field" + id).value = "";
+		return;
+	}
+
+	// grab the array by reference of which player's cards we're dealing with
+	var cards = (isPlayer1FromConstantId(id) ? player1Lineup : player2Lineup);
+	var lineupIndex = getPlayerLineupIndex(id);
+	if (lineupIndex >= cards.length) {
+		alert("No card is here");
+		document.getElementById("edit-dmg-field" + id).value = "";
+		return;
+	}
+	var card = cards[lineupIndex];
+	if (card == null) {
+		alert("No card is here");
+		document.getElementById("edit-dmg-field" + id).value = "";
+		return;
+	}
+
+	addDmg(card, num);
+
+	// redisplay the card with the modified DMG value
+	displayCard(id);
+	document.getElementById("edit-dmg-field" + id).value = "";
+}
+
+/*** CHARACTER CARD MOVEMENT FUNCTIONS ***/
+
+// general function for moving 
+function moveToStandby(startArray, startIndex, isPlayer1) {
+	// can't be out of bounds
+	if (startIndex >= startArray.length) {
+		console.log("moveToStandby - ERROR: tried to access bad index in array");
+		return;
+	}
+	// can't be empty
+	var card = startArray[startIndex];
+	console.log("moveToStandby - ERROR: tried to access bad index in array");
+	if (card == null) { 
+		return;
+	}
+}
+
+// slides both lineups towards Pos 0
+function slideLineups() {
+	slideLineup(true);
+	slideLineup(false);
+}
+
+function slideLineup(isPlayer1) {
+	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
+	// essentially bubble everything down
+	for (var i = 0; i < 4; i++) {
+
+	}
+}
+
 /*** PHASE FUNCTIONS ***/
 
 function nextPhase() {
@@ -482,7 +481,7 @@ function displayCard(i) {
 	var div = document.getElementById("position-card-container" + i);
 
 	// grab the array by reference of which player's cards we're dealing with
-	var cards = (isPlayer1(i) ? player1Lineup : player2Lineup);
+	var cards = (isPlayer1FromConstantId(i) ? player1Lineup : player2Lineup);
 	var lineupIndex = getPlayerLineupIndex(i);
 	if (lineupIndex >= cards.length) {
 		div.innerHTML = "";
@@ -567,6 +566,47 @@ function hideDefeatedModal() {
 
 }
 
+/*** CARD MENU FUNCTIONS ***/
+
+// moves a card with localId to standby
+function moveToStandbyByCardMenu(localId) {
+	var card = getCardFromLocalId(localId);
+	if (card == null) {
+		console.log("moveToStandbyByCardMenu - ERROR: cannot find card by local id");
+		return;
+	}
+
+	var originArray = card.array;
+	if (originArray == "standby") return;
+	moveCardToStandby(card);
+	if (originArray == "lineup") {
+		displayLineup();
+	}
+	else if (originArray == "defeated") {
+		showDefeatedModal(card.isPlayer1);
+	}
+}
+
+// moves a card with localId to defeated
+function moveToDefeatedByCardMenu(localId) {
+	var card = getCardFromLocalId(localId);
+	if (card == null) {
+		console.log("moveToDefeatedByCardMenu - ERROR: cannot find card by local id");
+		return;
+	}
+	var originArray = card.array;
+	if (originArray == "defeated") {
+		return;
+	}
+	moveCardToDefeated(card);
+	if (originArray == "lineup") {
+		displayLineup();
+	}
+	else if (originArray == "standby") {
+		showStandbyModal(card.isPlayer1);
+	}
+}
+
 /*** OTHER HELPER FUNCTIONS ***/
 
 function getCardFromLocalId(localId) {
@@ -591,17 +631,14 @@ function cleanArray(array) {
 	return array;
 }
 
-// returns whether a id refers to Player 1's cards
-function isPlayer1(id) {
-	return id <= 4;
-	/*
-	for (var i = 0; i < player1Cards.length; i++) {
-		if (player1Cards[i].localId == localId) return true;
-	}
 
-	for (var i = 0; i < player2Cards.length; i++) {
-		if (player2Cards[i].localId == localId) return false;
-	} */
+/** I would consider the below functions to be legacy code because they depend on the card container id as opposed to the local id.
+	The plan would be to slowly phase these out from use and then delete.
+	**/
+
+// returns whether a html constant id refers to Player 1's cards
+function isPlayer1FromConstantId(id) {
+	return id <= 4;
 }
 
 // returns the appropriate index of player's lineup given an id
@@ -609,20 +646,11 @@ function getPlayerLineupIndex(id) {
 	// if Player1, pos1 is actually id=card4, pos2 card is id=card3, pos3 is id=card2, pos4 is id=card1
 	// keep in mind things are 0-based indexes in the arrays themselves though
 	var fixedIds = [3, 2, 1, 0];
-	return (isPlayer1(id) ? fixedIds[id-1] : id-5);
-
-	/*
-	for (var i = 0; i < player1Lineup.length; i++) {
-		if (player1Lineup[i].localId == localId) return i;
-	}
-
-	for (var i = 0; i < player2Lineup.length; i++) {
-		if (player2Lineup[i].localId == localId) return i;
-	} */
+	return (isPlayer1FromConstantId(id) ? fixedIds[id-1] : id-5);
 }
 
 // returns the id given a player lineup index
 function getCardId(isPlayer1, index) {
 	var fixedIds = [4, 3, 2, 1];
-	return (isPlayer1 ? fixedIds[index] : index+5);
+	return (isPlayer1FromConstantId ? fixedIds[index] : index+5);
 }

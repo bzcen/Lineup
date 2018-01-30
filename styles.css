@@ -205,28 +205,6 @@ body {
 	font-weight: bold;
 }
 
-.move-to-defeated-button {
-	height: 40px;
-	cursor: pointer;
-	font-size: 13px;
-	font-weight: bold;
-	margin-left: auto;
-	margin-right: auto;
-	width: 90%;
-	display: block;
-}
-
-.move-to-standby-button {
-	height: 40px;
-	cursor: pointer;
-	font-size: 13px;
-	font-weight: bold;
-	margin-left: auto;
-	margin-right: auto;
-	width: 90%;
-	display: block;
-}
-
 input[class$="header-button"] {
 	flex: 0.2;
 	font-weight: bold;
