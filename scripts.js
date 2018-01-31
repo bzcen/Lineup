@@ -111,8 +111,11 @@ window.onload = function() {
 	pushActionCardToTotal("Swap Enemies", true);
 	pushActionCardToTotal("Swap Enemies", true);
 
-	for (var i = 0; i < player1ActionCards.length; i++) {
+	for (var i = 0; i < 3; i++) {
 		moveActionCardToHand(player1ActionCards[i]);
+	}
+	for (var i = 3; i < 5; i++) {
+		moveActionCardToDeck(player1ActionCards[i]);
 	}
 
 
@@ -159,6 +162,9 @@ function setUpContextListener() {
 		} else if (clickInsideElement(e, "actions-deck-container")) {
 			deckInContext = clickInsideElement(e, "actions-deck-container");
 			type = "deck";
+		} else {
+			cardInContext = null;
+			deckInContext = null;
 		}
 
 		if (cardInContext) {
@@ -313,6 +319,12 @@ function cardMenuLinkListener(link) {
 			break;
 		case "move-to-discards":
 			moveToDiscardsByCardMenu(card_id);
+			break;
+		case "draw":
+			drawByCardMenu(deck_id);
+			break;
+		case "shuffle":
+			shuffleByCardMenu(deck_id);
 			break;
 		default:
 			break;
@@ -1057,6 +1069,28 @@ function remove1DmgByCardMenu(localId) {
 	displayLineup();
 }
 
+function drawByCardMenu(deck_id) {
+	var isPlayer1 = deck_id == 1;
+	var deck = (isPlayer1 ? player1Deck : player2Deck);
+
+	if (deck.length == 0) {
+		console.log("drawByCardMenu - ERROR: deck is empty");
+		return;
+	}
+	moveCardToArray(deck[0], "hand");
+	showActionsModal(isPlayer1);
+}
+
+function shuffleByCardMenu(deck_id) {
+	var isPlayer1 = deck_id == 1;
+	if (isPlayer1) {
+		player1Deck = shuffleArray(player1Deck);
+	} else {
+		player2Deck = shuflfeArray(player2Deck);
+	}
+
+}
+
 
 /*** OTHER HELPER FUNCTIONS ***/
 
@@ -1084,6 +1118,27 @@ function cleanArray(array) {
 	for (var i = 0; i < array.length; i++) {
 		array[i].arrayIndex = i;
 	}
+	return array;
+}
+
+// apply Fisher-Yates Shuffle to an array
+// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array/12646864
+function shuffleArray(array) {
+	var currentIndex = array.length, temporaryValue, randomIndex;
+
+	// While there remain elements to shuffle...
+	while (0 !== currentIndex) {
+
+		// Pick a remaining element...
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex -= 1;
+
+		// And swap it with the current element.
+		temporaryValue = array[currentIndex];
+		array[currentIndex] = array[randomIndex];
+		array[randomIndex] = temporaryValue;
+	}
+
 	return array;
 }
 
