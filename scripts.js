@@ -883,8 +883,14 @@ function showActionsModal(isPlayer1) {
 
 	var hand = (isPlayer1 ? player1Hand : player2Hand);
 	var hand_container = document.getElementById("actions-modal-hand-container");
+	
+	var deckSize = (isPlayer1 ? player1Deck.length : player2Deck.length);
+	// also render the deck inside the hand container
+	hand_container.innerHTML = "<div class=\"actions-deck-container\" id=\"actions-deck-container\">" +
+		"<h2> Deck (" + deckSize + ") </h2>" +
+		"</div>"
+	;
 
-	hand_container.innerHTML = "";
 	for (var i = 0; i < hand.length; i++) {
 		hand_container.innerHTML += getActionCardDisplayHTML(hand[i]);
 	}
