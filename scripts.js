@@ -48,7 +48,7 @@ class ActionCard {
 
 		this.localId = nextActionCardLocalIdToUse;
 		// increment the next local id to use
-		nextCardLocalIdToUse++;
+		nextActionCardLocalIdToUse++;
 		this.isPlayer1;
 		this.array = null;
 		this.arrayIndex;
@@ -302,6 +302,18 @@ function cardMenuLinkListener(link) {
 		case "remove-1-dmg":
 			remove1DmgByCardMenu(card_id);
 			break;
+		case "move-to-hand":
+			moveToHandByCardMenu(card_id);
+			break;
+		case "move-to-flips":
+			moveToFlipsByCardMenu(card_id);
+			break;
+		case "move-to-deck":
+			moveToDeckByCardMenu(card_id);
+			break;
+		case "move-to-discards":
+			moveToDiscardsByCardMenu(card_id);
+			break;
 		default:
 			break;
 	}
@@ -344,25 +356,82 @@ function removeCardFromCurrentArray(card) {
 		var lineup = (card.isPlayer1 ? player1Lineup : player2Lineup);
 		lineup[card.arrayIndex] = null;
 	}
-	else if (card.array == "defeated") {
-		var defeated = (card.isPlayer1 ? player1Defeated : player2Defeated);
-		defeated[card.arrayIndex] = null;
-		if (card.isPlayer1) {
-			player1Defeated = cleanArray(defeated);
-		} else {
-			player2Defeated = cleanArray(defeated);
-		}
+	// in all other cases, we don't need to occupy the deleted spot with a null
+	var originArray = card.array;
+	var arrayToDeleteFrom;
+	switch (card.array) {
+		case "defeated":
+			arrayToDeleteFrom = (card.isPlayer1 ? player1Defeated : player2Defeated);
+			break;
+		case "standby":
+			arrayToDeleteFrom = (card.isPlayer1 ? player1Standby : player2Standby);
+			break;
+		case "hand":
+			arrayToDeleteFrom = (card.isPlayer1 ? player1Hand : player2Hand);
+			break;
+		case "deck":
+			arrayToDeleteFrom = (card.isPlayer1 ? player1Deck : player2Deck);
+			break;
+		case "flips":
+			arrayToDeleteFrom = (card.isPlayer1 ? player1Flips : player2Flips);
+			break;
+		case "discards":
+			arrayToDeleteFrom = (card.isPlayer1 ? player1Discards : player2Discards);
+			break;
+		default:
+			break;
 	}
-	else if (card.array == "standby") {
-		var standby = (card.isPlayer1 ? player1Standby : player2Standby);
-		standby[card.arrayIndex] = null;
-		if (card.isPlayer1) {
-			player1Standby = cleanArray(standby);
-		} else {
-			player2Standby = cleanArray(standby);
-		}
-	}
+
+	arrayToDeleteFrom[card.arrayIndex] = null;
 	card.array = null;
+
+	// I wish I knew a better way to do this rip, but we need to clean arrays
+	switch (originArray) {
+		case "defeated":
+			if (card.isPlayer1) {
+				player1Defeated = cleanArray(arrayToDeleteFrom);
+			} else {
+				player2Defeated = cleanArray(arrayToDeleteFrom);
+			}
+			break;
+		case "standby":
+			if (card.isPlayer1) {
+				player1Standby = cleanArray(arrayToDeleteFrom);
+			} else {
+				player2Standby = cleanArray(arrayToDeleteFrom);
+			}
+			break;
+		case "hand":
+			if (card.isPlayer1) {
+				player1Hand = cleanArray(arrayToDeleteFrom);
+			} else {
+				player2Hand = cleanArray(arrayToDeleteFrom);
+			}
+			break;
+		case "deck":
+			if (card.isPlayer1) {
+				player1Deck = cleanArray(arrayToDeleteFrom);
+			} else {
+				player2Deck = cleanArray(arrayToDeleteFrom);
+			}
+			break;
+		case "flips":
+			if (card.isPlayer1) {
+				player1Flips = cleanArray(arrayToDeleteFrom);
+			} else {
+				player2Flips = cleanArray(arrayToDeleteFrom);
+			}
+			break;
+		case "discards":
+			if (card.isPlayer1) {
+				player1Discards = cleanArray(arrayToDeleteFrom);
+			} else {
+				player2Discards = cleanArray(arrayToDeleteFrom);
+			}
+			break;
+		default:
+			break;
+	}
 }
 
 // general purpose function that moves a card to another array, editing the index and arrayString attributes
@@ -384,6 +453,15 @@ function moveCardToArray(card, arrayString) {
 			break;
 		case "hand":
 			arrayToAddTo = (card.isPlayer1 ? player1Hand : player2Hand);
+			break;
+		case "flips":
+			arrayToAddTo = (card.isPlayer1 ? player1Flips : player2Flips);
+			break;
+		case "deck":
+			arrayToAddTo = (card.isPlayer1 ? player1Deck : player2Deck);
+			break;
+		case "discards":
+			arrayToAddTo = (card.isPlayer1 ? player1Discards : player2Discards);
 			break;
 		default:
 			console.log("moveCardToArray - ERROR: unrecognized or banned arrayString");
@@ -437,6 +515,18 @@ function moveCardToStandby(card) {
 
 function moveActionCardToHand(actionCard) {
 	moveCardToArray(actionCard, "hand");
+}
+
+function moveActionCardToFlips(actionCard) {
+	moveCardToArray(actionCard, "flips");
+}
+
+function moveActionCardToDeck(actionCard) {
+	moveCardToArray(actionCard, "deck");
+}
+
+function moveActionCardToDiscards(actionCard) {
+	moveCardToArray(actionCard, "discards");
 }
 
 // slides both lineups towards Pos 0
@@ -799,6 +889,14 @@ function showActionsModal(isPlayer1) {
 		hand_container.innerHTML += getActionCardDisplayHTML(hand[i]);
 	}
 
+	var flips = (isPlayer1 ? player1Flips : player2Flips);
+	var flips_container = document.getElementById("actions-modal-flips-container");
+
+	flips_container.innerHTML = "";
+	for (var i = 0; i < flips.length; i++) {
+		flips_container.innerHTML += getActionCardDisplayHTML(flips[i]);
+	}
+
 	var discards = (isPlayer1 ? player1Discards : player2Discards);
 	var discards_container = document.getElementById("actions-modal-discards-container");
 
@@ -824,7 +922,7 @@ function hideActionsModal() {
 
 // moves a card with localId to a position on the lineup
 function moveToLineupByCardMenu(localId, posIndex) {
-	var card = getCardFromLocalId(localId);
+	var card = getCardFromLocalId(localId, false /* isActionCard */);
 	if (card == null) {
 		console.log("moveToLineupByCardMenu - ERROR: cannot find card by local id");
 		return;
@@ -840,7 +938,7 @@ function moveToLineupByCardMenu(localId, posIndex) {
 
 // moves a card with localId to standby
 function moveToStandbyByCardMenu(localId) {
-	var card = getCardFromLocalId(localId);
+	var card = getCardFromLocalId(localId, false /* isActionCard */);
 	if (card == null) {
 		console.log("moveToStandbyByCardMenu - ERROR: cannot find card by local id");
 		return;
@@ -860,7 +958,7 @@ function moveToStandbyByCardMenu(localId) {
 
 // moves a card with localId to defeated
 function moveToDefeatedByCardMenu(localId) {
-	var card = getCardFromLocalId(localId);
+	var card = getCardFromLocalId(localId, false /* isActionCard */);
 	if (card == null) {
 		console.log("moveToDefeatedByCardMenu - ERROR: cannot find card by local id");
 		return;
@@ -877,8 +975,64 @@ function moveToDefeatedByCardMenu(localId) {
 	}
 }
 
+// moves an action card with localId to hand
+function moveToHandByCardMenu(localId) {
+	var card = getCardFromLocalId(localId, true /* isActionCard */);
+	if (card == null) {
+		console.log("moveToHandByCardMenu - ERROR: cannot find card by local id");
+		return;
+	}
+	var originArray = card.array;
+	if (originArray == "hand") return;
+
+	moveActionCardToHand(card);
+	showActionsModal(card.isPlayer1);
+}
+
+// moves an action card with localId to flips
+function moveToFlipsByCardMenu(localId) {
+	var card = getCardFromLocalId(localId, true /* isActionCard */);
+	if (card == null) {
+		console.log("moveToFlipsByCardMenu - ERROR: cannot find card by local id");
+		return;
+	}
+	var originArray = card.array;
+	if (originArray == "flips") return;
+
+	moveActionCardToFlips(card);
+	showActionsModal(card.isPlayer1);
+}
+
+// moves an action card with localId to discards
+function moveToDiscardsByCardMenu(localId) {
+	var card = getCardFromLocalId(localId, true /* isActionCard */);
+	if (card == null) {
+		console.log("moveToDiscardsByCardMenu - ERROR: cannot find card by local id");
+		return;
+	}
+	var originArray = card.array;
+	if (originArray == "discards") return;
+
+	moveActionCardToDiscards(card);
+	showActionsModal(card.isPlayer1);
+}
+
+// moves an action card with localId to deck
+function moveToDeckByCardMenu(localId) {
+	var card = getCardFromLocalId(localId, true /* isActionCard */);
+	if (card == null) {
+		console.log("moveToDeckByCardMenu - ERROR: cannot find card by local id");
+		return;
+	}
+	var originArray = card.array;
+	if (originArray == "deck") return;
+
+	moveActionCardToDeck(card);
+	showActionsModal(card.isPlayer1);
+}
+
 function add1DmgByCardMenu(localId) {
-	var card = getCardFromLocalId(localId);
+	var card = getCardFromLocalId(localId, false /* isActionCard */);
 	if (card == null) {
 		console.log("add1DmgByCardMenu - ERROR: cannot find card by local id");
 		return;
@@ -888,7 +1042,7 @@ function add1DmgByCardMenu(localId) {
 }
 
 function remove1DmgByCardMenu(localId) {
-	var card = getCardFromLocalId(localId);
+	var card = getCardFromLocalId(localId, false /* isActionCard */);
 	if (card == null) {
 		console.log("remove1DmgByCardMenu - ERROR: cannot find card by local id");
 		return;
@@ -900,13 +1054,17 @@ function remove1DmgByCardMenu(localId) {
 
 /*** OTHER HELPER FUNCTIONS ***/
 
-function getCardFromLocalId(localId) {
-	for (var i = 0; i < player1Cards.length; i++) {
-		var card = player1Cards[i];
+// works for both action cards and character cards
+function getCardFromLocalId(localId, isActionCard) {
+	var p1Array = (isActionCard ? player1ActionCards : player1Cards);
+	var p2Array = (isActionCard ? player2ActionCards : player2Cards);
+
+	for (var i = 0; i < p1Array.length; i++) {
+		var card = p1Array[i];
 		if (card.localId == localId) return card;
 	}
-	for (var i = 0; i < player2Cards.length; i++) {
-		var card = player2Cards[i];
+	for (var i = 0; i < p2Array.length; i++) {
+		var card = p2Array[i];
 		if (card.localId == localId) return card;
 	} 
 	return null;
