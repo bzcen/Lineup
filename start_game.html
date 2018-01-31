@@ -172,37 +172,71 @@
 <div class="actions-modal" id="actions-modal">
 	<div class="actions-modal-content">
 		<div class="actions-modal-header">
-			<h2> ACTION CARDS </h2>
+			<h2> Deck & Hand </h2>
 		</div>
-		<div class="actions-modal-hand-container" id="actions-modal-hand-container"></div>
+		<div class="actions-modal-body">
+			<div class="actions-deck-container" id="actions-deck-container">
+				<h2> Deck </h2>
+			</div>
+			<div class="actions-modal-hand-container" id="actions-modal-hand-container"></div>
+		</div>
+
+		<div class="actions-modal-header">
+			<h2> Flips </h2>
+		</div>
+		<div class="actions-modal-body">
+			<div class="actions-modal-flips-container" id="actions-modal-flips-container"></div>
+		</div>
+
+		<div class="actions-modal-header">
+			<h2> Discards </h2>
+		</div>
+		<div class="actions-modal-body">
+			<div class="actions-modal-discards-container" id="actions-modal-discards-container"></div>
+		</div>
 	</div>
 </div>
 
 <nav class="card-menu" id="card-menu">
 	<ul class="card-menu-items">
-		<li class="card-menu-item">
+		<li class="card-menu-item" type="character">
 			<a href="#" class="card-menu-link" menu-action="move-to-pos-1"> Move to Pos 1 </a>
 		</li>
-		<li class="card-menu-item">
+		<li class="card-menu-item" type="character">
 			<a href="#" class="card-menu-link" menu-action="move-to-pos-2"> Move to Pos 2 </a>
 		</li>
-		<li class="card-menu-item">
+		<li class="card-menu-item" type="character">
 			<a href="#" class="card-menu-link" menu-action="move-to-pos-3"> Move to Pos 3 </a>
 		</li>
-		<li class="card-menu-item">
+		<li class="card-menu-item" type="character">
 			<a href="#" class="card-menu-link" menu-action="move-to-pos-4"> Move to Pos 4 </a>
 		</li>
-		<li class="card-menu-item">
+		<li class="card-menu-item" type="character">
 			<a href="#" class="card-menu-link" menu-action="move-to-standby"> Move to Standby </a>
 		</li>
-		<li class="card-menu-item">
+		<li class="card-menu-item" type="character">
 			<a href="#" class="card-menu-link" menu-action="move-to-defeated"> Move to Defeated </a>
 		</li>
-		<li class="card-menu-item">
+		<li class="card-menu-item" type="character">
 			<a href="#" class="card-menu-link" menu-action="add-1-dmg"> Add 1 DMG </a>
 		</li>
-		<li class="card-menu-item">
+		<li class="card-menu-item" type="character">
 			<a href="#" class="card-menu-link" menu-action="remove-1-dmg"> Remove 1 DMG </a>
+		</li>
+		<li class="card-menu-item" type="action-card">
+			<a href="#" class="card-menu-link" menu-action="move-to-hand"> Move to Hand </a>
+		</li>
+		<li class="card-menu-item" type="action-card">
+			<a href="#" class="card-menu-link" menu-action="move-to-flips"> Move to Flips </a>
+		</li>
+		<li class="card-menu-item" type="action-card">
+			<a href="#" class="card-menu-link" menu-action="discard"> Discard </a>
+		</li>
+		<li class="card-menu-item" type="deck">
+			<a href="#" class="card-menu-link" menu-action="draw"> Draw </a>
+		</li>		
+		<li class="card-menu-item" type="deck">
+			<a href="#" class="card-menu-link" menu-action="shuffle"> Shuffle </a>
 		</li>
 	</ul>
 </nav>

@@ -15,6 +15,7 @@ var cardMenuPositionX;
 var cardMenuPositionY;
 
 var cardInContext;
+var deckInContext;
 
 class Character {
 	constructor(name, level, imagePath, combatActions, abilities, factionBonus, hp) {
@@ -105,7 +106,14 @@ window.onload = function() {
 
 	// temporary
 	pushActionCardToTotal("Swap Enemies", true);
-	moveActionCardToHand(player1ActionCards[0]);
+	pushActionCardToTotal("Swap Enemies", true);
+	pushActionCardToTotal("Swap Enemies", true);
+	pushActionCardToTotal("Swap Enemies", true);
+	pushActionCardToTotal("Swap Enemies", true);
+
+	for (var i = 0; i < player1ActionCards.length; i++) {
+		moveActionCardToHand(player1ActionCards[i]);
+	}
 
 
 	// render HTML of all lineup cards
@@ -141,14 +149,31 @@ function setUpContextListener() {
 	cardMenu = document.querySelector("#card-menu");
 
 	document.addEventListener("contextmenu", function(e) {
-		cardInContext = clickInsideElement(e, "card-container");
+		var type;
+		if (clickInsideElement(e, "card-container")) {
+			cardInContext = clickInsideElement(e, "card-container");
+			type = "character";
+		} else if (clickInsideElement(e, "action-card-container")) {
+			cardInContext = clickInsideElement(e, "action-card-container");
+			type = "action-card";
+		} else if (clickInsideElement(e, "actions-deck-container")) {
+			deckInContext = clickInsideElement(e, "actions-deck-container");
+			type = "deck";
+		}
 
 		if (cardInContext) {
+			deckInContext = null;
 			e.preventDefault();
-			toggleCardMenuOn();
+			toggleCardMenuOn(type);
+			positionCardMenu(e);
+		} else if (deckInContext) {
+			cardInContext = null;
+			e.preventDefault();
+			toggleCardMenuOn(type);
 			positionCardMenu(e);
 		} else {
 			cardInContext = null;
+			deckInContext = null;
 			toggleCardMenuOff();
 		}
 	});
@@ -200,11 +225,21 @@ function getEventPosition(e) {
 	}
 }
 
-function toggleCardMenuOn() {
+function toggleCardMenuOn(type) {
 	if (cardMenuState !== 1) {
 		cardMenuState = 1;
 		// this could probably be redone to just change the display style
 		cardMenu.classList.add(cardMenuActive);
+		// need to adjust which menu items to actually show
+		var menu_items = document.getElementsByClassName("card-menu-item");
+		for (var i = 0; i < menu_items.length; i++) {
+			var t = menu_items[i].getAttribute("type");
+			if (t != type) {
+				menu_items[i].style.display = "none";
+			} else {
+				menu_items[i].style.display = "block";
+			}
+		}
 	}
 }
 
@@ -232,7 +267,14 @@ function setUpClickListener() {
 }
 
 function cardMenuLinkListener(link) {
-	var card_id = cardInContext.getAttribute("card-local-id");
+	var card_id = -1;
+	var deck_id = -1;
+	if (cardInContext != null) {
+		card_id = cardInContext.getAttribute("card-local-id");
+	}
+	if (deckInContext != null) {
+		deck_id = deckInContext.getAttribute("deck-local-id");
+	}
 	var menu_action = link.getAttribute("menu-action");
 
 	switch (menu_action) {
@@ -756,6 +798,19 @@ function showActionsModal(isPlayer1) {
 	for (var i = 0; i < hand.length; i++) {
 		hand_container.innerHTML += getActionCardDisplayHTML(hand[i]);
 	}
+
+	var discards = (isPlayer1 ? player1Discards : player2Discards);
+	var discards_container = document.getElementById("actions-modal-discards-container");
+
+	discards_container.innerHTML = "";
+	for (var i = 0; i < discards.length; i++) {
+		discards_container.innerHTML += getActionCardDisplayHTML(discards[i]);
+	}
+
+	// also need to set the attribute 'deck-id' of the deck container to handle context menus
+	// 1 = player 1, 2 = player 2
+	var deck = document.getElementById("actions-deck-container");
+	deck.setAttribute("deck-local-id", (isPlayer1 ? 1 : 2));
 }
 
 function hideActionsModal() {

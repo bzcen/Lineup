@@ -260,6 +260,7 @@ input[class$="header-button"] {
 	border: 5px solid black;
 	height: 200px;
 	width: 150px;
+	margin: 5px;
 }
 
 .action-card-container .header {
@@ -392,6 +393,30 @@ div[class$="modal-card-container"] {
 
 .actions-modal-content {
 	background-color: orchid;
+}
+
+.actions-modal-body {
+	display: inline-flex;
+}
+
+.actions-deck-container {
+	background: peru;
+	text-align: center;
+	border: 5px solid black;
+	height: 200px;
+	width: 150px;
+	display: flex;
+	align-items: center;
+	margin: 5px;
+}
+
+.actions-deck-container h2 {
+	flex: 1;
+}
+
+.actions-modal-hand-container {
+	display: inline-flex;
+	flex-wrap: wrap;
 }
 
 	/* animation for modal */
