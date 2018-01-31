@@ -1,8 +1,10 @@
 const phases = ["Place Actions", "Flip Actions", "Combat", "End of Combat", "Resolve Combat", "End of Turn", "Upkeep"];
 var phaseIndex = -1;
 
-/* used for local card ids to be assigned to each added card */
+/* used for local card ids to be assigned to each added character card */
 var nextCardLocalIdToUse = 1; 
+/* used for local action card ids to be assigned to each action card */
+var nextActionCardLocalIdToUse = 1;
 
 /* used for card menu context menu */
 var cardMenu;
@@ -36,6 +38,22 @@ class Character {
 	}
 }
 
+class ActionCard {
+	constructor(name, cost, details, imagePath) {
+		this.name = name;
+		this.cost = cost;
+		this.details = details;
+		this.imagePath = imagePath;
+
+		this.localId = nextActionCardLocalIdToUse;
+		// increment the next local id to use
+		nextCardLocalIdToUse++;
+		this.isPlayer1;
+		this.array = null;
+		this.arrayIndex;
+	}
+}
+
 var player1Cards = [];
 var player2Cards = [];
 var player1Lineup = [];
@@ -44,6 +62,17 @@ var player1Standby = [];
 var player2Standby = [];
 var player1Defeated = [];
 var player2Defeated = [];
+
+var player1ActionCards = [];
+var player2ActionCards = [];
+var player1Deck = [];
+var player2Deck = [];
+var player1Discards = [];
+var player2Discards = [];
+var player1Flips = [];
+var player2Flips = [];
+var player1Hand = [];
+var player2Hand = [];
 
 /*** SETUP FUNCTIONS ***/
 
@@ -74,6 +103,11 @@ window.onload = function() {
 		moveCardToLineup(player2Cards[i], i);
 	}
 
+	// temporary
+	pushActionCardToTotal("Swap Enemies", true);
+	moveActionCardToHand(player1ActionCards[0]);
+
+
 	// render HTML of all lineup cards
 	displayLineup();
 	nextPhase();
@@ -87,11 +121,15 @@ window.onload = function() {
 window.onclick = function(event) {
 	var standby_modal = document.getElementById("standby-modal");
 	var defeated_modal = document.getElementById("defeated-modal");
+	var actions_modal = document.getElementById("actions-modal");
     if (event.target == standby_modal) {
     	hideStandbyModal();
     }
     if (event.target == defeated_modal) {
     	hideDefeatedModal();
+    }
+    if (event.target == actions_modal) {
+    	hideActionsModal();
     }
 }
 
@@ -231,7 +269,16 @@ function cardMenuLinkListener(link) {
 
 /*** DECK/LINEUP/HAND CONSTRUCTION FUNCTIONS ***/
 
-// will actual create the new card instance, stores it in total cards (which doesn't get modified)
+// will actually create a new action card instance, stores it in total cards (which doesn't get modified)
+function pushActionCardToTotal(actionCardName, isPlayer1) {
+	var arrayToAddTo = (isPlayer1 ? player1ActionCards : player2ActionCards);
+
+	var action = constructActionCardFromDB(actionCardName);
+	action.isPlayer1 = isPlayer1;
+	arrayToAddTo.push(action);
+} 
+
+// will actually create the new card instance, stores it in total cards (which doesn't get modified)
 function pushCardToTotal(cardName, isPlayer1) {
 	var arrayToAddTo = (isPlayer1 ? player1Cards : player2Cards);
 
@@ -293,6 +340,9 @@ function moveCardToArray(card, arrayString) {
 		case "standby":
 			arrayToAddTo = (card.isPlayer1 ? player1Standby : player2Standby);
 			break;
+		case "hand":
+			arrayToAddTo = (card.isPlayer1 ? player1Hand : player2Hand);
+			break;
 		default:
 			console.log("moveCardToArray - ERROR: unrecognized or banned arrayString");
 			return;
@@ -343,19 +393,8 @@ function moveCardToStandby(card) {
 	moveCardToArray(card, "standby");
 }
 
-// general function for moving 
-function moveToStandby(startArray, startIndex, isPlayer1) {
-	// can't be out of bounds
-	if (startIndex >= startArray.length) {
-		console.log("moveToStandby - ERROR: tried to access bad index in array");
-		return;
-	}
-	// can't be empty
-	var card = startArray[startIndex];
-	console.log("moveToStandby - ERROR: tried to access bad index in array");
-	if (card == null) { 
-		return;
-	}
+function moveActionCardToHand(actionCard) {
+	moveCardToArray(actionCard, "hand");
 }
 
 // slides both lineups towards Pos 0
@@ -406,6 +445,15 @@ function constructCharacterFromDB(cardName) {
 				var c = characters[i];
 				return new Character(c.name, c.level, c.imagePath, c.combatActions, c.abilities, c.factionBonus, c.hp);
 			}
+		}
+	}
+}
+
+function constructActionCardFromDB(cardName) {
+	for (var i = 0; i < actionsDB.length; i++) {
+		if (actionsDB[i].name == cardName) {
+			var a = actionsDB[i];
+			return new ActionCard(a.name, a.cost, a.details, a.imagePath);
 		}
 	}
 }
@@ -616,7 +664,7 @@ function getCardDisplayHTML(card) {
 	var combatActionsText = (card.combatActions != null ? card.combatActions.description : "");
 	var abilitiesText = (card.hasOwnProperty("abilities") ? card.abilities : "");
 
-	htmlString = 
+	var htmlString = 
 		"<div class=\"card-container\" card-local-id=\"" + card.localId + "\">" +
 		"<div class=\"header\">" +
 		"<h3>" + card.name + "</h3>" + "<div class=\"filler\"></div>" + "<h3>Lvl." + card.level + "</h3>" +
@@ -625,13 +673,30 @@ function getCardDisplayHTML(card) {
 		"<bodyHeaderCombat>Combat Actions</bodyHeaderCombat>" + "<p>" + combatActionsText + "</p>" +
 		"<bodyHeaderAbilities>Abilities</bodyHeaderAbilities>" + "<p>" + abilitiesText + "</p>" +
 		"<bodyHeaderFaction>Faction Bonus</bodyHeaderFaction>" + "<p>" + card.factionBonus + "</p>" +
-		"<hpHeader>MAX HP: " + card.hp + "</hpHeader>" +
+		"<div class=\"hp-dmg-container\">" +
+		"<hpHeader>HP: " + card.hp + "</hpHeader>" +
 		"<dmgHeader>DMG: " + card.dmg + "</dmgHeader>" +
-		"</div"
+		"</div>" +
+		"</div>"
 	;
 
 	return htmlString;
 }
+
+// Get action card HTML string
+function getActionCardDisplayHTML(actionCard) {
+	var htmlString =
+		"<div class=\"action-card-container\" card-local-id=\"" + actionCard.localId + "\">" +
+		"<div class=\"header\">" +
+		"<h3>" + actionCard.name + "</h3>" + "<div class=\"filler\"></div>" + "<h3>Cost: " + actionCard.cost + "</h3>" +
+		"</div>" +
+		"<img src=\"" + actionCard.imagePath + "\" alt=\"placeholder image\">" +
+		"<p>" + actionCard.details + "</p>" +
+		"</div>"
+	;
+
+	return htmlString;
+};
 
 /*** MODAL FUNCTIONS ***/
 
@@ -680,12 +745,24 @@ function hideDefeatedModal() {
 	card_container.innerHTML = "";
 }
 
-function showActionsModal() {
+function showActionsModal(isPlayer1) {
+	var modal = document.getElementById("actions-modal");
+	modal.style.display = "block";
 
+	var hand = (isPlayer1 ? player1Hand : player2Hand);
+	var hand_container = document.getElementById("actions-modal-hand-container");
+
+	hand_container.innerHTML = "";
+	for (var i = 0; i < hand.length; i++) {
+		hand_container.innerHTML += getActionCardDisplayHTML(hand[i]);
+	}
 }
 
 function hideActionsModal() {
-
+	var modal = document.getElementById("actions-modal");
+	modal.style.display= "none";
+	var hand_container = document.getElementById("actions-modal-hand-container");
+	hand_container.innerHTML = "";
 }
 
 /*** CARD MENU FUNCTIONS ***/

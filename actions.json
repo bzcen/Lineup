@@ -1,0 +1,10 @@
+// next id to use = 2
+actionsDB = [
+	{
+		"id": 1,
+		"name": "Swap Enemies",
+		"cost": 2,
+		"details": "Some test body text, idk idk idk idk",
+		"imagePath": "images/placeholder.jpg"
+	},
+];

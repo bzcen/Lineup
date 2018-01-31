@@ -97,99 +97,6 @@
 	background: powderblue;
 }
 
-/* only used by modals to give a fixed width to cards without being in
-   a position container */
-.card-outer-container {
- 	width: 155px;
- 	margin-left: 5px;
- 	margin-right: 5px;
-}
-
-.card-container {
-	background: white;
-	flex: 1;
-	text-align: center;
-	border: 5px solid black;
-}
-
-/* use of flex in order to fill horizontal space between name and level */
-.card-container .header {
-	display: flex;
-	flex-direction: row;
-	border-bottom: 1px solid black;
-}
-
-.card-container .header h3 {
-	color: black;
-	text-align: center;
-	font-size: 0.7em;
-	flex: auto;
-	margin: 0px;
-	padding: 0px;
-}
-
-.card-container .header .filler {
-	flex: auto;
-}
-
-.card-container bodyHeaderCombat {
-	color: teal;
-	font-size: 0.6em;
-	text-align: left;
-	display:block;
-	font-weight: bold;
-	border-top: 1px solid black;
-	padding-top: 3px;
-}
-
-.card-container bodyHeaderAbilities {
-	color: salmon;
-	font-size: 0.6em;
-	text-align: left;
-	display:block;
-	font-weight: bold;
-	border-top: 1px solid black;
-	padding-top: 3px;
-}
-
-.card-container bodyHeaderFaction {
-	color: mediumorchid;
-	font-size: 0.6em;
-	text-align: left;
-	display:block;
-	font-weight: bold;
-	border-top: 1px solid black;
-	padding-top: 3px;
-}
-
-.card-container hpHeader {
-	color: blue;
-	font-size: 0.8em;
-	text-align: center;
-	display:block;
-	font-weight: bold;
-	border-top: 1px solid black;
-}
-
-.card-container dmgHeader {
-	color: red;
-	font-size: 0.8em;
-	text-align: center;
-	display:block;
-	font-weight: bold;
-}
-
-.card-container img {
-	max-width: 140px;
-	max-height: 100px;
-}
-
-.card-container p {
-	font-size: 0.7em;
-	text-align: left;
-	margin: 0px;
-}
-
 .edit-dmg-container {
 	text-align: center;
 }
@@ -244,6 +151,143 @@ input[class$="header-button"] {
 
 .swap-position-field {
 	flex: 1;
+}
+
+/*** CHARACTER CARD ***/
+
+/* only used by modals to give a fixed width to cards without being in
+   a position container */
+.card-outer-container {
+ 	width: 155px;
+ 	margin-left: 5px;
+ 	margin-right: 5px;
+}
+
+.card-container {
+	background: white;
+	flex: 1;
+	text-align: center;
+	border: 5px solid black;
+}
+
+/* use of flex in order to fill horizontal space between name and level */
+.card-container .header {
+	display: flex;
+	flex-direction: row;
+	border-bottom: 1px solid black;
+}
+
+.card-container .header h3 {
+	color: black;
+	text-align: center;
+	font-size: 0.7em;
+	flex: auto;
+	margin: 0px;
+	padding: 0px;
+}
+
+.card-container bodyHeaderCombat {
+	color: teal;
+	font-size: 0.6em;
+	text-align: left;
+	display:block;
+	font-weight: bold;
+	border-top: 1px solid black;
+	padding-top: 3px;
+}
+
+.card-container bodyHeaderAbilities {
+	color: salmon;
+	font-size: 0.6em;
+	text-align: left;
+	display:block;
+	font-weight: bold;
+	border-top: 1px solid black;
+	padding-top: 3px;
+}
+
+.card-container bodyHeaderFaction {
+	color: mediumorchid;
+	font-size: 0.6em;
+	text-align: left;
+	display:block;
+	font-weight: bold;
+	border-top: 1px solid black;
+	padding-top: 3px;
+}
+
+.card-container .hp-dmg-container {
+	display: inline-flex;
+	border-top: 1px solid black;
+	text-align: center;
+	width: 100%;
+}
+
+.card-container hpHeader {
+	color: blue;
+	font-size: 0.8em;
+	text-align: center;
+	display:block;
+	font-weight: bold;
+	flex:1;
+}
+
+.card-container dmgHeader {
+	color: red;
+	font-size: 0.8em;
+	text-align: center;
+	display:block;
+	font-weight: bold;
+	flex:1;
+}
+
+.card-container img {
+	max-width: 140px;
+	max-height: 100px;
+}
+
+.card-container p {
+	font-size: 0.7em;
+	text-align: left;
+	margin: 0px;
+}
+
+/*** ACTION CARDS ***/
+
+.action-card-container {
+	background: white;
+	text-align: center;
+	border: 5px solid black;
+	height: 200px;
+	width: 150px;
+}
+
+.action-card-container .header {
+	display: flex;
+	flex-direction: row;
+	border-bottom: 1px solid black;
+}
+
+.action-card-container .header h3 {
+	color: black;
+	text-align: center;
+	font-size: 0.7em;
+	flex: auto;
+	margin: 0px;
+	padding: 0px;
+}
+
+.action-card-container img {
+	max-width: 140px;
+	max-height: 100px;
+}
+
+.action-card-container p {
+	font-size: 0.7em;
+	text-align: left;
+	margin: 0px;
+	border-top: 1px solid black;
+	padding: 3px;
 }
 
 /*** BOTTOM BAR ***/

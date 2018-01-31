@@ -3,6 +3,7 @@
 <head>
 	<link rel="stylesheet" href="styles.css">
 	<script type="text/javascript" src="characters.json"></script>
+	<script type="text/javascript" src="actions.json"></script>
 	<script type="text/javascript" src="scripts.js"></script>
 </head>
 
@@ -19,7 +20,7 @@
 				<input class="show-standby-header-button" id="show-standby-button1" type="button" value="Standby" onclick="showStandbyModal(true)">
 				<input class="show-defeated-header-button" id="show-defeated-button1" type="button" value="Defeated" onclick="showDefeatedModal(true)">
 				<h2> Player 1 </h2>
-				<input class="show-actions-header-button" id="show-actions-button1" type="button" value="ACTIONS">
+				<input class="show-actions-header-button" id="show-actions-button1" type="button" value="ACTIONS" onclick="showActionsModal(true)">
 				<div class="swap-container">
 					<input class="swap-button" id="swap-button-1" type="button" value="Swap" onclick="swapPositions(true)">
 					<input class="swap-position-field" id="swap-position-field1-1" type="text" size="4">
@@ -77,7 +78,7 @@
 				<input class="show-standby-header-button" id="show-standby-button2" type="button" value="Standby" onclick="showStandbyModal(false)">
 				<input class="show-defeated-header-button" id="show-defeated-button2" type="button" value="Defeated" onclick="showDefeatedModal(false)">
 				<h2> Player 2 </h2>
-				<input class="show-actions-header-button" id="show-actions-button2" type="button" value="ACTIONS">
+				<input class="show-actions-header-button" id="show-actions-button2" type="button" value="ACTIONS" onclick="showActionsModal(false)">
 				<div class="swap-container">
 					<input class="swap-button" id="swap-button-1" type="button" value="Swap" onclick="swapPositions(false)">
 					<input class="swap-position-field" id="swap-position-field2-1" type="text" size="4">
@@ -165,6 +166,15 @@
 			<h2> DEFEATED </h2>
 		</div>
 		<div class="defeated-modal-card-container" id="defeated-modal-card-container"></div>
+	</div>
+</div>
+
+<div class="actions-modal" id="actions-modal">
+	<div class="actions-modal-content">
+		<div class="actions-modal-header">
+			<h2> ACTION CARDS </h2>
+		</div>
+		<div class="actions-modal-hand-container" id="actions-modal-hand-container"></div>
 	</div>
 </div>
 
