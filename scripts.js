@@ -459,6 +459,10 @@ function moveCardToArray(card, arrayString) {
 		console.log("moveCardToArray - ERROR: tried to push null card to an array");
 		return;
 	}
+	if (card.array == arrayString) {
+		console.log("moveCardToArray - ERROR: trying to move card to the same array");
+		return;
+	}
 
 	var arrayToAddTo;
 	switch (arrayString) {
@@ -484,21 +488,30 @@ function moveCardToArray(card, arrayString) {
 			console.log("moveCardToArray - ERROR: unrecognized or banned arrayString");
 			return;
 	}
-
-	// remove the card from its original home
+	var originArray = card.array;
+	var originArrayIndex = card.arrayIndex;
+	var shouldLog = false;
 	if (card.array != null) {
+		shouldLog = true;
+		// remove the card from its original home
 		removeCardFromCurrentArray(card);
 	}
 
 	card.array = arrayString;
 	card.arrayIndex = arrayToAddTo.length;
 	arrayToAddTo.push(card);
+
+	if (shouldLog) addToActionLog(buildMovedToText(card, originArray, originArrayIndex), "normal-entry");
 }
 
 // need to be a little more special about this cause its needs a posIndex
 function moveCardToLineup(card, posIndex) {
 	if (card == null) {
 		console.log("moveCardToLineup - ERROR: tried to move null card");
+		return;
+	}
+	if (card.arrayIndex == posIndex) {
+		console.log("moveCardToLineup - ERROR: tried to move card to the same pos");
 		return;
 	}
 	if (posIndex >= 4) {
@@ -511,13 +524,18 @@ function moveCardToLineup(card, posIndex) {
 		console.log("moveCardToLineup - ERROR: card is in the way");
 		return;
 	}
-
+	var originArray = card.array;
+	var originArrayIndex = card.arrayIndex;
+	var shouldLog = false;
 	if (card.array != null) {
+		shouldLog = true;
 		removeCardFromCurrentArray(card);
 	}
 	card.array = "lineup";
 	card.arrayIndex = posIndex;
 	lineupToAddTo[posIndex] = card;
+
+	if (shouldLog) addToActionLog(buildMovedToText(card, originArray, originArrayIndex), "normal-entry");
 }
 
 // pushes a card by reference into a defeated pool
@@ -559,22 +577,14 @@ function slideLineup(isPlayer1) {
 	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
 	// essentially bubble everything down (can skip the first)
 	for (var i = 1; i < 4; i++) {
-		var slidingHappened = false;
 		// skip if there's no card at this spot
 		if (lineup[i] == null) continue;
 
 		// keep on moving the card down the lineup
 		var j = i;
 		while (j > 0 && lineup[j-1] == null) {
-			slidingHappened = true;
 			moveCardToLineup(lineup[j], j-1);
 			j--;
-		}
-
-		if (slidingHappened) {
-			var action_log_text = lineup[j].name + " slid from <blueText>Pos " + i +
-				"</blueText> to <blueText>Pos " + j + "</blueText>";
-			addToActionLog(action_log_text, "normal-entry");
 		}
 	}
 	if (isPlayer1) displayPlayer1Lineup();
@@ -776,7 +786,7 @@ function nextPhase() {
 	if (phaseIndex >= phases.length) phaseIndex = 0;
 
 	var action_log_text = "";
-	if (phaseIndex == 0) {
+	if (phaseIndex == 0 || (phaseIndex == 1 && roundNum == 0)) {
 		roundNum++;
 		addToActionLog("Beginning of Round " + roundNum, "round-entry");
 	}
@@ -923,12 +933,10 @@ function addToActionLog(text, entry_class) {
 
 // NOTE: depends on the card having been moved already
 function buildMovedToText(card, originArray, originArrayIndex) {
-	var player_text = (card.isPlayer1 ? "Player 1" : "Player 2");
-
 	var origin_array_text = getColorfiedArrayText(originArray, originArrayIndex);
 	var destination_array_text = getColorfiedArrayText(card.array, card.arrayIndex);
 
-	return player_text + " moved " + card.name + " from " + origin_array_text + " to " + destination_array_text;
+	return card.name + " moved from " + origin_array_text + " to " + destination_array_text;
 }
 
 function getColorfiedArrayText(arrayString, arrayIndex) {
@@ -1079,8 +1087,6 @@ function moveToLineupByCardMenu(localId, posIndex) {
 
 	if (originArray == "standby") showStandbyModal(card.isPlayer1);
 	else if (originArray == "defeated") showDefeatedModal(card.isPlayer1);
-
-	addToActionLog(buildMovedToText(card, originArray, originArrayIndex), "normal-entry");
 }
 
 // moves a card with localId to standby
@@ -1194,6 +1200,9 @@ function add1DmgByCardMenu(localId) {
 	}
 	addDmg(card, 1);
 	displayLineup();
+
+	var action_log_text = "<firebrickText>1 DMG</firebrickText> was added to " + card.name;
+	addToActionLog(action_log_text, "normal-entry");
 }
 
 function remove1DmgByCardMenu(localId) {
@@ -1204,6 +1213,9 @@ function remove1DmgByCardMenu(localId) {
 	}
 	addDmg(card, -1);
 	displayLineup();
+
+	var action_log_text = "<firebrickText>1 DMG</firebrickText> was removed from " + card.name;
+	addToActionLog(action_log_text, "normal-entry");
 }
 
 function drawByCardMenu(deck_id) {
