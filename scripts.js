@@ -492,7 +492,11 @@ function moveCardToArray(card, arrayString) {
 	var originArrayIndex = card.arrayIndex;
 	var shouldLog = false;
 	if (card.array != null) {
-		shouldLog = true;
+		// we don't want to log movement out of the deck because that's the same as drawing
+		// which already has its own log functionality
+		if (originArray != "deck") {
+			shouldLog = true;
+		}
 		// remove the card from its original home
 		removeCardFromCurrentArray(card);
 	}
@@ -718,9 +722,25 @@ function endOfTurn() {
 	addToActionLog("Applying Player 2's End-of-Turn Effects...", "important-entry");
 }
 
-// TODO(bcen): handle draw card and other upkeep stuff
+// TODO(bcen): handle other upkeep stuff
 function upkeep() {
 	slideLineups();
+	// both players draw a card
+	draw(true);
+	draw(false);
+}
+
+function draw(isPlayer1) {
+	var deck = (isPlayer1 ? player1Deck : player2Deck);
+
+	if (deck.length == 0) {
+		console.log("drawByCardMenu - ERROR: deck is empty");
+		return;
+	}
+	moveCardToArray(deck[0], "hand");
+
+	var player_text = (isPlayer1 ? "Player 1" : "Player 2");
+	addToActionLog(player_text + " drew a card", "normal-entry");
 }
 
 /*** FUNCTIONS CALLED FROM MAIN HTML COMPONENT aka Combat Field ***/
@@ -1219,25 +1239,21 @@ function remove1DmgByCardMenu(localId) {
 }
 
 function drawByCardMenu(deck_id) {
-	var isPlayer1 = deck_id == 1;
-	var deck = (isPlayer1 ? player1Deck : player2Deck);
-
-	if (deck.length == 0) {
-		console.log("drawByCardMenu - ERROR: deck is empty");
-		return;
-	}
-	moveCardToArray(deck[0], "hand");
+	var isPlayer1 = (deck_id == 1);
+	draw(isPlayer1);
 	showActionsModal(isPlayer1);
 }
 
 function shuffleByCardMenu(deck_id) {
-	var isPlayer1 = deck_id == 1;
+	var isPlayer1 = (deck_id == 1);
 	if (isPlayer1) {
 		player1Deck = shuffleArray(player1Deck);
 	} else {
 		player2Deck = shuflfeArray(player2Deck);
 	}
 
+	var player_text = (isPlayer1 ? "Player 1" : "Player 2");
+	addToActionLog(player_text + "'s deck was shuffled", "normal-entry");
 }
 
 /*** OTHER HELPER FUNCTIONS ***/
