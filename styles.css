@@ -97,25 +97,6 @@
 	background: powderblue;
 }
 
-.edit-dmg-container {
-	text-align: center;
-}
-
-.edit-dmg-button {
-	width: 75px;
-	height: 40px;
-	cursor: pointer;
-	font-size: 13px;
-	font-weight: bold;
-}
-
-.edit-dmg-field {
-	width: 30px;
-	height: 20px;
-	font-size: 18px;
-	font-weight: bold;
-}
-
 input[class$="header-button"] {
 	flex: 0.2;
 	font-weight: bold;
@@ -298,7 +279,7 @@ input[class$="header-button"] {
 	display: inline-flex;
 	align-items: stretch;
 	width: 100%;
-	height: 135px;
+	height: 165px;
 	border-bottom: thick solid black;
 }
 
@@ -357,7 +338,7 @@ input[class$="header-button"] {
 	flex: 1 1 auto;
 	flex-direction: column;
 	overflow-y: auto;
-	height: 135px;
+	height: 165px;
 	display: flex;
 	min-height: 0px
 }
@@ -369,16 +350,22 @@ input[class$="header-button"] {
 }
 
 .bottom-bar .action-log-content .round-entry {
-	background-color: darkgrey;
+	background-color: deepskyblue;
 }
 
 .bottom-bar .action-log-content .phase-entry {
-	background-color: lightgrey;
+	background-color: lightsteelblue;
 }
 
 
-.bottom-bar .action-log-content .normal-entry {
+.bottom-bar .action-log-content .normal-entry-1 {
 	background-color: white;
+	padding-left: 20px;
+}
+
+.bottom-bar .action-log-content .normal-entry-2 {
+	background-color: gainsboro;
+	padding-left: 20px;
 }
 
 /*** MODALS ***/
@@ -455,14 +442,14 @@ div[class$="modal-card-container"] {
 /*** CARD MENU ***/
 
 .card-menu {
-  display: none;
-  position: absolute;
-  z-index: 10;
-  padding: 12px 0;
-  width: 150px;
-  background-color: #fff;
-  border: solid 1px #dfdfdf;
-  box-shadow: 1px 1px 2px #cfcfcf;
+	display: none;
+	position: absolute;
+	z-index: 10;
+	padding: 12px 0;
+	width: 150px;
+	background-color: #fff;
+	border: solid 1px #dfdfdf;
+	box-shadow: 1px 1px 2px #cfcfcf;
 }
 
 .card-menu--active {
@@ -476,22 +463,35 @@ div[class$="modal-card-container"] {
 }
 
 .card-menu-item {
-  display: block;
-  margin-bottom: 4px;
+	display: block;
+	margin-bottom: 4px;
 }
 
 .card-menu-item:last-child {
-  margin-bottom: 0;
+	margin-bottom: 0;
 }
 
 .card-menu-link {
-  display: block;
-  padding: 4px 12px;
-  color: #0066aa;
-  text-decoration: none;
+	display: block;
+	padding: 4px 12px;
+	color: #0066aa;
+	text-decoration: none;
 }
 
 .card-menu-link:hover {
-  color: #fff;
-  background-color: #0066aa;
+	color: #fff;
+	background-color: #0066aa;
+}
+
+/*** EXTRA ***/
+lightgreenText {
+	color: lightgreen;
+}
+
+firebrickText {
+	color: firebrick;
+}
+
+blueText {
+	color: blue;
 }

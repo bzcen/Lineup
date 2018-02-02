@@ -1,6 +1,8 @@
 const phases = ["Place Actions", "Flip Actions", "Combat", "End of Combat", "Resolve Combat", "End of Turn", "Upkeep"];
 var phaseIndex = -1;
 var roundNum = 0;
+// used for alternating colors per normal action log entry
+var normalActionLogEntryNum = 0;
 
 /* used for local card ids to be assigned to each added character card */
 var nextCardLocalIdToUse = 1; 
@@ -368,6 +370,8 @@ function removeCardFromCurrentArray(card) {
 	if (card.array == "lineup") {
 		var lineup = (card.isPlayer1 ? player1Lineup : player2Lineup);
 		lineup[card.arrayIndex] = null;
+		card.array = null;
+		return;
 	}
 	// in all other cases, we don't need to occupy the deleted spot with a null
 	var originArray = card.array;
@@ -640,9 +644,13 @@ function applyCombatAction(card) {
 		return;
 	}
 
+
 	var lineupToAttack = (card.isPlayer1 ? player2Lineup : player1Lineup);
 	var actions = card.combatActions.details;
 	for (var i = 0; i < actions.length; i++) {
+		var action_log_text = card.name + " dealt ";
+		var hitSomething = false;
+
 		var action = actions[i];
 		var attackingPositions = getValidPositions(action.position);
 		// don't do anything if the card isn't in the right position
@@ -653,7 +661,16 @@ function applyCombatAction(card) {
 		for (var j = 0; j < attackedPositions.length; j++) {
 			if (attackedPositions[j] && lineupToAttack[j] != null) {
 				addDmg(lineupToAttack[j], action.dmg);
+				// adding a comma if something was added before
+				if (hitSomething) action_log_text += ", ";
+				action_log_text += "<firebrickText>" + action.dmg + " DMG</firebrickText> to " +
+					lineupToAttack[j].name + " <blueText>(Pos " + (j+1) + ")</blueText>";
+				hitSomething = true;
 			}
+		}
+		// if something hit, print to action log!
+		if (hitSomething) {
+			addToActionLog(action_log_text, "normal-entry");
 		}
 	}
 	displayLineup();
@@ -705,50 +722,14 @@ function swapPositions(isPlayer1) {
 	displayCard(getCardId(isPlayer1, indexA));
 	displayCard(getCardId(isPlayer1, indexB));
 
+	var player_text = (isPlayer1 ? "Player 1" : "Player 2");
+	var action_log_text = player_text + "'s <blueText>Pos " + posA +
+		"</blueText> and <blueText>Pos " + posB + "</blueText> were swapped";
+	addToActionLog(action_log_text, "normal-entry");
+
 	fieldA.value = "";
 	fieldB.value = "";
 	return;
-}
-
-function addDmgFromCombatField(id) {
-	var fieldValue = document.getElementById("edit-dmg-field" + id).value;
-	if (fieldValue == "") {
-		alert("Input a number");
-		return;
-	}
-
-	var num = Number(fieldValue);
-	if (num == NaN) {
-		alert("Input a number");
-		document.getElementById("edit-dmg-field" + id).value = "";
-		return;
-	}
-	if (num%1!=0) {
-		alert("Input a whole number");
-		document.getElementById("edit-dmg-field" + id).value = "";
-		return;
-	}
-
-	// grab the array by reference of which player's cards we're dealing with
-	var cards = (isPlayer1FromConstantId(id) ? player1Lineup : player2Lineup);
-	var lineupIndex = getPlayerLineupIndex(id);
-	if (lineupIndex >= cards.length) {
-		alert("No card is here");
-		document.getElementById("edit-dmg-field" + id).value = "";
-		return;
-	}
-	var card = cards[lineupIndex];
-	if (card == null) {
-		alert("No card is here");
-		document.getElementById("edit-dmg-field" + id).value = "";
-		return;
-	}
-
-	addDmg(card, num);
-
-	// redisplay the card with the modified DMG value
-	displayCard(id);
-	document.getElementById("edit-dmg-field" + id).value = "";
 }
 
 /*** PHASE FUNCTIONS ***/
@@ -764,6 +745,7 @@ function nextPhase() {
 	}
 	var tag = "Current Phase: ";
 	addToActionLog(tag + phases[phaseIndex], "phase-entry");
+	normalActionLogEntryNum = 0;
 }
 
 /*** DISPLAY FUNCTIONS ***/
@@ -848,17 +830,67 @@ function getActionCardDisplayHTML(actionCard) {
 	;
 
 	return htmlString;
-};
+}
 
 // adds a message to the action log
 // available classes: "normal-entry", "phase-entry", "round-entry"
 function addToActionLog(text, entry_class) {
 	var action_log = document.getElementById("action-log-content");
 
+	if (entry_class == "normal-entry") {
+		if (normalActionLogEntryNum%2 == 0){
+			entry_class += "-1";
+		} else {
+			entry_class += "-2";
+		}
+	}
 	action_log.innerHTML += "<div class=\"" + entry_class + "\">" + text + "</div>";
 
 	// scroll to the bottom of the overflowing div
 	action_log.scrollTop = action_log.scrollHeight;
+	normalActionLogEntryNum++;
+}
+
+// NOTE: depends on the card having been moved already
+function buildMovedToText(card, originArray, originArrayIndex) {
+	var player_text = (card.isPlayer1 ? "Player 1" : "Player 2");
+
+	var origin_array_text = getColorfiedArrayText(originArray, originArrayIndex);
+	var destination_array_text = getColorfiedArrayText(card.array, card.arrayIndex);
+
+	return player_text + " moved " + card.name + " from " + origin_array_text + " to " + destination_array_text;
+}
+
+function getColorfiedArrayText(arrayString, arrayIndex) {
+
+	array_text = "";
+	switch (arrayString) {
+		case "lineup":
+			array_text = "<blueText>Lineup (Pos " + (arrayIndex+1) + ")</blueText>";
+			break;
+		case "defeated":
+			array_text = "<firebrickText>Defeated</firebrickText>";
+			break;
+		case "standby":
+			array_text = "<lightgreenText>Standby</lightgreenText>";
+			break;
+		case "hand":
+			array_text = "Hand";
+			break;
+		case "deck":
+			array_text = "Deck";
+			break;
+		case "flips":
+			array_text = "Flips";
+			break;
+		case "discards":
+			array_text = "Discards";
+			break;
+		default:
+			break;
+	}
+
+	return array_text;
 }
 
 /*** MODAL FUNCTIONS ***/
@@ -965,12 +997,15 @@ function moveToLineupByCardMenu(localId, posIndex) {
 		return;
 	}
 	var originArray = card.array;
+	var originArrayIndex = card.arrayIndex;
 
 	moveCardToLineup(card, posIndex);
 	displayLineup();
 
 	if (originArray == "standby") showStandbyModal(card.isPlayer1);
 	else if (originArray == "defeated") showDefeatedModal(card.isPlayer1);
+
+	addToActionLog(buildMovedToText(card, originArray, originArrayIndex), "normal-entry");
 }
 
 // moves a card with localId to standby
@@ -982,15 +1017,19 @@ function moveToStandbyByCardMenu(localId) {
 	}
 
 	var originArray = card.array;
+	var originArrayIndex = card.arrayIndex;
 	if (originArray == "standby") return;
 
 	moveCardToStandby(card);
+
 	if (originArray == "lineup") {
 		displayLineup();
 	}
 	else if (originArray == "defeated") {
 		showDefeatedModal(card.isPlayer1);
 	}
+
+	addToActionLog(buildMovedToText(card, originArray, originArrayIndex), "normal-entry");
 }
 
 // moves a card with localId to defeated
@@ -1001,15 +1040,19 @@ function moveToDefeatedByCardMenu(localId) {
 		return;
 	}
 	var originArray = card.array;
+	var originArrayIndex = card.arrayIndex;
 	if (originArray == "defeated") return;
 
 	moveCardToDefeated(card);
+
 	if (originArray == "lineup") {
 		displayLineup();
 	}
 	else if (originArray == "standby") {
 		showStandbyModal(card.isPlayer1);
 	}
+
+	addToActionLog(buildMovedToText(card, originArray, originArrayIndex), "normal-entry");
 }
 
 // moves an action card with localId to hand
@@ -1195,5 +1238,5 @@ function getPlayerLineupIndex(id) {
 // returns the id given a player lineup index
 function getCardId(isPlayer1, index) {
 	var fixedIds = [4, 3, 2, 1];
-	return (isPlayer1FromConstantId ? fixedIds[index] : index+5);
+	return (isPlayer1 ? fixedIds[index] : index+5);
 }
