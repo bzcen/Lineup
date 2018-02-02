@@ -1,5 +1,5 @@
-const phases = ["Place Actions", "Flip Actions", "Combat", "End of Combat", "Resolve Combat", "End of Turn", "Upkeep"];
-var phaseIndex = -1;
+const phases = ["Upkeep", "Place Actions", "Flip Actions", "Combat", "End of Combat", "Resolve Combat", "End of Turn"];
+var phaseIndex = 0;
 var roundNum = 0;
 // used for alternating colors per normal action log entry
 var normalActionLogEntryNum = 0;
@@ -547,8 +547,11 @@ function moveActionCardToDiscards(actionCard) {
 }
 
 // slides both lineups towards Pos 0
+// TODO(bcen): make this follow the leader
 function slideLineups() {
+	addToActionLog("Sliding Player 1's Lineup...", "important-entry");
 	slideLineup(true);
+	addToActionLog("Sliding Player 2's Lineup...", "important-entry");
 	slideLineup(false);
 }
 
@@ -556,28 +559,40 @@ function slideLineup(isPlayer1) {
 	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
 	// essentially bubble everything down (can skip the first)
 	for (var i = 1; i < 4; i++) {
+		var slidingHappened = false;
 		// skip if there's no card at this spot
 		if (lineup[i] == null) continue;
 
 		// keep on moving the card down the lineup
 		var j = i;
 		while (j > 0 && lineup[j-1] == null) {
+			slidingHappened = true;
 			moveCardToLineup(lineup[j], j-1);
 			j--;
+		}
+
+		if (slidingHappened) {
+			var action_log_text = lineup[j].name + " slid from <blueText>Pos " + i +
+				"</blueText> to <blueText>Pos " + j + "</blueText>";
+			addToActionLog(action_log_text, "normal-entry");
 		}
 	}
 	if (isPlayer1) displayPlayer1Lineup();
 	else displayPlayer2Lineup();
 }
 
+// TODO(bcen): make this follow the leader
 function removeDefeatedFromLineups() {
-	for (var i = 0; i < player1Lineup.length; i++) {
-		var card = player1Lineup[i];
-		if (card != null && card.dmg >= card.hp) moveCardToDefeated(card);
-	}
+	addToActionLog("Removing defeated characters from Player 1's Lineup...", "important-entry");
+	removeDefeatedFromLineup(true);
+	addToActionLog("Removing defeated characters from Player 2's Lineup...", "important-entry");
+	removeDefeatedFromLineup(false);
+}
 
-	for (var i = 0; i < player2Lineup.length; i++) {
-		var card = player2Lineup[i];
+function removeDefeatedFromLineup(isPlayer1) {
+	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
+	for (var i = 0; i < lineup.length; i++) {
+		var card = lineup[i];
 		if (card != null && card.dmg >= card.hp) moveCardToDefeated(card);
 	}
 	displayLineup();
@@ -615,17 +630,21 @@ function addDmg(card, dmg) {
 }
 
 // applies the combat actions of all cards in both lineups
+// TODO(bcen): make this follow the leader
 function combatActions() {
-	for (var i = 0; i < player1Lineup.length; i++) {
-		var card = player1Lineup[i];
+	addToActionLog("Applying Player 1's Combat...", "important-entry");
+	applyCombatActions(true);
+
+	addToActionLog("Applying Player 2's Combat...", "important-entry");
+	applyCombatActions(false);
+}
+
+function applyCombatActions(isPlayer1) {
+	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
+	for (var i = 0; i < lineup.length; i++) {
+		var card = lineup[i];
 		if (card != null) applyCombatAction(card);
 	}
-
-	for (var i = 0; i < player2Lineup.length; i++) {
-		var card = player2Lineup[i];
-		if (card != null) applyCombatAction(card);
-	}
-
 	displayLineup();
 }
 
@@ -643,7 +662,6 @@ function applyCombatAction(card) {
 	if (card.combatActions == null) {
 		return;
 	}
-
 
 	var lineupToAttack = (card.isPlayer1 ? player2Lineup : player1Lineup);
 	var actions = card.combatActions.details;
@@ -674,6 +692,25 @@ function applyCombatAction(card) {
 		}
 	}
 	displayLineup();
+}
+
+// TODO(bcen): make this follow the leader
+// TODO(bcen): refactor json DB to somehow include EoC effects
+function endOfCombat() {
+	addToActionLog("Applying Player 1's End-of-Combat Effects...", "important-entry");
+	addToActionLog("Applying Player 2's End-of-Combat Effects...", "important-entry");
+}
+
+// TODO(bcen): make this follow the leader
+// TODO(bcen): refactor json DB to somehow include EoT effects
+function endOfTurn() {
+	addToActionLog("Applying Player 1's End-of-Turn Effects...", "important-entry");
+	addToActionLog("Applying Player 2's End-of-Turn Effects...", "important-entry");
+}
+
+// TODO(bcen): handle draw card and other upkeep stuff
+function upkeep() {
+	slideLineups();
 }
 
 /*** FUNCTIONS CALLED FROM MAIN HTML COMPONENT aka Combat Field ***/
@@ -745,7 +782,38 @@ function nextPhase() {
 	}
 	var tag = "Current Phase: ";
 	addToActionLog(tag + phases[phaseIndex], "phase-entry");
-	normalActionLogEntryNum = 0;
+
+	// Automated way of running some of the phases...
+	switch (phaseIndex) {
+		// upkeep
+		case 0:
+			upkeep();
+			break;
+		// place actions
+		case 1:
+			break;
+		// flip actions
+		case 2:
+			break;
+		// combat
+		case 3:
+			combatActions();
+			break;
+		// end of combat
+		case 4:
+			endOfCombat();
+			break;
+		// resolve combat
+		case 5:
+			removeDefeatedFromLineups();
+			break;
+		// end of turn
+		case 6:
+			endOfTurn();
+			break;
+		default:
+			break;
+	}
 }
 
 /*** DISPLAY FUNCTIONS ***/
@@ -843,12 +911,14 @@ function addToActionLog(text, entry_class) {
 		} else {
 			entry_class += "-2";
 		}
+		normalActionLogEntryNum++;
+	} else {
+		normalActionLogEntryNum = 0;
 	}
 	action_log.innerHTML += "<div class=\"" + entry_class + "\">" + text + "</div>";
 
 	// scroll to the bottom of the overflowing div
 	action_log.scrollTop = action_log.scrollHeight;
-	normalActionLogEntryNum++;
 }
 
 // NOTE: depends on the card having been moved already
@@ -998,6 +1068,11 @@ function moveToLineupByCardMenu(localId, posIndex) {
 	}
 	var originArray = card.array;
 	var originArrayIndex = card.arrayIndex;
+
+	if (originArray == "lineup" && originArrayIndex == posIndex) {
+		console.log("moveToLineupByCardMenu - ERROR: card is already at this pos");
+		return;
+	}
 
 	moveCardToLineup(card, posIndex);
 	displayLineup();
@@ -1152,7 +1227,6 @@ function shuffleByCardMenu(deck_id) {
 	}
 
 }
-
 
 /*** OTHER HELPER FUNCTIONS ***/
 
