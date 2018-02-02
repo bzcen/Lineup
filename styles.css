@@ -351,7 +351,34 @@ input[class$="header-button"] {
 
 .bottom-bar .action-log {
 	flex: 3;
-	height: 100%;
+}
+
+.bottom-bar .action-log-content {
+	flex: 1 1 auto;
+	flex-direction: column;
+	overflow-y: auto;
+	height: 135px;
+	display: flex;
+	min-height: 0px
+}
+
+/* workaround since "justify-content: flex-end;"
+   does not work with y overflow scrolling */
+.bottom-bar .action-log-content > :first-child {
+	margin-top: auto !important;
+}
+
+.bottom-bar .action-log-content .round-entry {
+	background-color: darkgrey;
+}
+
+.bottom-bar .action-log-content .phase-entry {
+	background-color: lightgrey;
+}
+
+
+.bottom-bar .action-log-content .normal-entry {
+	background-color: white;
 }
 
 /*** MODALS ***/

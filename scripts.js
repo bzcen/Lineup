@@ -1,5 +1,6 @@
 const phases = ["Place Actions", "Flip Actions", "Combat", "End of Combat", "Resolve Combat", "End of Turn", "Upkeep"];
 var phaseIndex = -1;
+var roundNum = 0;
 
 /* used for local card ids to be assigned to each added character card */
 var nextCardLocalIdToUse = 1; 
@@ -755,7 +756,14 @@ function addDmgFromCombatField(id) {
 function nextPhase() {
 	phaseIndex++;
 	if (phaseIndex >= phases.length) phaseIndex = 0;
-	displayPhase();
+
+	var action_log_text = "";
+	if (phaseIndex == 0) {
+		roundNum++;
+		addToActionLog("Beginning of Round " + roundNum, "round-entry");
+	}
+	var tag = "Current Phase: ";
+	addToActionLog(tag + phases[phaseIndex], "phase-entry");
 }
 
 /*** DISPLAY FUNCTIONS ***/
@@ -841,6 +849,17 @@ function getActionCardDisplayHTML(actionCard) {
 
 	return htmlString;
 };
+
+// adds a message to the action log
+// available classes: "normal-entry", "phase-entry", "round-entry"
+function addToActionLog(text, entry_class) {
+	var action_log = document.getElementById("action-log-content");
+
+	action_log.innerHTML += "<div class=\"" + entry_class + "\">" + text + "</div>";
+
+	// scroll to the bottom of the overflowing div
+	action_log.scrollTop = action_log.scrollHeight;
+}
 
 /*** MODAL FUNCTIONS ***/
 
