@@ -7,6 +7,6 @@ https://docs.google.com/spreadsheets/d/19YSdbDIrYURknm8D67S7bl1fV4q1Wg_i6ntb2bHr
 
 ## Task List:
 
-- [] Basic AI with a preset deck
-- [] Deck/Lineup creation screen
-- [] Data Metrics when game concludes
+- [ ] Basic AI with a preset deck
+- [ ] Deck/Lineup creation screen
+- [ ] Data Metrics when game concludes
