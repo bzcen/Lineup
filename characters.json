@@ -4,6 +4,7 @@ characterDB = {
 		"Legion": [
 			{
 				"id": 7,
+				"faction": "Legion",
 				"name": "Augustus",
 				"level": 4,
 				"imagePath": "images/legion_placeholder.jpg",
@@ -18,21 +19,37 @@ characterDB = {
 					]
 				},
 				"abilities": "During combat, prevent 1 DMG counter from being added to the character behind this character",
-				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+				"factionBonus": {
+					"description": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+					"details": [
+						{
+							"type": "end-of-turn",
+						}
+					]
+				},
 				"hp": 12	
 			},
 			{
 				"id": 8,
+				"faction": "Legion",
 				"name": "Matilda",
 				"level": 2,
 				"imagePath": "images/legion_placeholder.jpg",
 				"combatActions": null,
 				"abilities": "At end of turn, remove 2 DMG counters from friendly characters in Position 1 and Position 2",
-				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+				"factionBonus": {
+					"description": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+					"details": [
+						{
+							"type": "end-of-turn",	
+						}
+					]
+				},
 				"hp": 6	
 			},
 			{
 				"id": 9,
+				"faction": "Legion",
 				"name": "Milo",
 				"level": 3,
 				"imagePath": "images/legion_placeholder.jpg",
@@ -47,11 +64,19 @@ characterDB = {
 					]
 				},				
 				"abilities": "",
-				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+				"factionBonus": {
+					"description": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+					"details": [
+						{
+							"type": "end-of-turn",
+						}
+					]
+				},
 				"hp": 13	
 			},
 			{
 				"id": 10,
+				"faction": "Legion",
 				"name": "Remus",
 				"level": 2,
 				"imagePath": "images/legion_placeholder.jpg",
@@ -66,11 +91,19 @@ characterDB = {
 					]
 				},
 				"abilities": "",
-				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+				"factionBonus": {
+					"description": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+					"details": [
+						{
+							"type": "end-of-turn",
+						}
+					]
+				},
 				"hp": 9
 			},
 			{
 				"id": 11,
+				"faction": "Legion",
 				"name": "Rufus",
 				"level": 2,
 				"imagePath": "images/legion_placeholder.jpg",
@@ -85,11 +118,19 @@ characterDB = {
 					]
 				},
 				"abilities": "At end of turn, remove 1 DMG counter from each character in your lineup",
-				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+				"factionBonus": {
+					"description": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+					"details": [
+						{
+							"type": "end-of-turn",
+						}
+					]
+				},
 				"hp": 7
 			},
 			{
 				"id": 12,
+				"faction": "Legion",
 				"name": "Zeus",
 				"level": 5,
 				"imagePath": "images/legion_placeholder.jpg",
@@ -109,13 +150,21 @@ characterDB = {
 					]
 				},
 				"abilities": "Whenever an opponent adds a character card to his/her lineup, add 3 DMG counters to it",
-				"factionBonus": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+				"factionBonus": {
+					"description": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
+					"details": [
+						{
+							"type": "end-of-turn",
+						}
+					]
+				},
 				"hp": 15
 			},
 		],
 		"Whirly West": [
 			{
 				"id": 1,
+				"faction": "Whirly West",
 				"name": "Billy",
 				"level": 4,
 				"imagePath": "images/whirly_west_placeholder.png",
@@ -136,11 +185,21 @@ characterDB = {
 					]
 				},
 				"abilities": "",
-				"factionBonus": "During combat, prevent 1 DMG counter from being added to this character",
+				"factionBonus": {
+					"description": "During combat, prevent 1 DMG counter from being added to this character",
+					"details": [
+						{
+							"type": "end-of-combat",
+							"functionName": "preventDmgFromCombat",
+							"parameters": 1,
+						}
+					]
+				},
 				"hp": 7
 			},
 			{
 				"id": 2,
+				"faction": "Whirly West",
 				"name": "Carbine",
 				"level": 3,
 				"imagePath": "images/whirly_west_placeholder.png",
@@ -155,11 +214,21 @@ characterDB = {
 					]
 				},
 				"abilities": "",
-				"factionBonus": "During combat, prevent 1 DMG counter from being added to this character",
+				"factionBonus": {
+					"description": "During combat, prevent 1 DMG counter from being added to this character",
+					"details": [
+						{
+							"type": "end-of-combat",
+							"functionName": "preventDmgFromCombat",
+							"parameters": 1,
+						}
+					]
+				},
 				"hp": 7
 			},
 			{
 				"id": 3,
+				"faction": "Whirly West",
 				"name": "Dexter",
 				"level": 1,
 				"imagePath": "images/whirly_west_placeholder.png",
@@ -174,11 +243,21 @@ characterDB = {
 					]
 				},
 				"abilities": "",
-				"factionBonus": "During combat, prevent 1 DMG counter from being added to this character",
+				"factionBonus": {
+					"description": "During combat, prevent 1 DMG counter from being added to this character",
+					"details": [
+						{
+							"type": "end-of-combat",
+							"functionName": "preventDmgFromCombat",
+							"parameters": 1,
+						}
+					]
+				},
 				"hp": 4
 			},
 			{
 				"id": 4,
+				"faction": "Whirly West",
 				"name": "Remington",
 				"level": 2,
 				"imagePath": "images/whirly_west_placeholder.png",
@@ -193,11 +272,21 @@ characterDB = {
 					]
 				},
 				"abilities": "",
-				"factionBonus": "During combat, prevent 1 DMG counter from being added to this character",
+				"factionBonus": {
+					"description": "During combat, prevent 1 DMG counter from being added to this character",
+					"details": [
+						{
+							"type": "end-of-combat",
+							"functionName": "preventDmgFromCombat",
+							"parameters": 1,
+						}
+					]
+				},
 				"hp": 5
 			},
 			{
 				"id": 5,
+				"faction": "Whirly West",
 				"name": "Renegade Rick",
 				"level": 3,
 				"imagePath": "images/whirly_west_placeholder.png",
@@ -217,11 +306,21 @@ characterDB = {
 					]
 				},
 				"abilities": "During combat, if there is less than 4 character cards in your lineup, deal +1 DMG to all Combat Actions",
-				"factionBonus": "During combat, prevent 1 DMG counter from being added to this character",
+				"factionBonus": {
+					"description": "During combat, prevent 1 DMG counter from being added to this character",
+					"details": [
+						{
+							"type": "end-of-combat",
+							"functionName": "preventDmgFromCombat",
+							"parameters": 1,
+						}
+					]
+				},
 				"hp": 10
 			},
 			{
 				"id": 6,
+				"faction": "Whirly West",
 				"name": "Sheriff S4M",
 				"level": 5,
 				"imagePath": "images/whirly_west_placeholder.png",
@@ -236,7 +335,16 @@ characterDB = {
 					]
 				},
 				"abilities": "At end of turn, draw an ACTION card for each opposing character card that died during this turn's resolve combat phase",
-				"factionBonus": "During combat, prevent 1 DMG counter from being added to this character",
+				"factionBonus": {
+					"description": "During combat, prevent 1 DMG counter from being added to this character",
+					"details": [
+						{
+							"type": "end-of-combat",
+							"functionName": "preventDmgFromCombat",
+							"parameters": 1,
+						}
+					]
+				},
 				"hp": 12
 			},
 		],

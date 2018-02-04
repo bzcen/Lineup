@@ -27,8 +27,9 @@ var cardInContext;
 var deckInContext;
 
 class Character {
-	constructor(name, level, imagePath, combatActions, abilities, factionBonus, hp) {
+	constructor(name, faction, level, imagePath, combatActions, abilities, factionBonus, hp) {
 		this.name = name;
+		this.faction = faction;
 		this.level = level;
 		this.imagePath = imagePath;
 		this.combatActions = combatActions;
@@ -48,6 +49,10 @@ class Character {
 
 		// used for Eager keyword
 		this.firstRound = false;
+
+		// currently primarily used for "prevent dmg from combat" abilities
+		// this gets reset to 0 at the end of turn
+		this.dmgFromCombatThisTurn = 0;
 	}
 }
 
@@ -634,7 +639,7 @@ function constructCharacterFromDB(cardName) {
 		for (var i = 0; i < characters.length; i++) {
 			if (characters[i].name == cardName) {
 				var c = characters[i];
-				return new Character(c.name, c.level, c.imagePath, c.combatActions, c.abilities, c.factionBonus, c.hp);
+				return new Character(c.name, c.faction, c.level, c.imagePath, c.combatActions, c.abilities, c.factionBonus, c.hp);
 			}
 		}
 	}
@@ -645,6 +650,75 @@ function constructActionCardFromDB(cardName) {
 		if (actionsDB[i].name == cardName) {
 			var a = actionsDB[i];
 			return new ActionCard(a.name, a.cost, a.details, a.imagePath);
+		}
+	}
+}
+
+/*** END OF COMBAT EFFECTS ***/
+
+function endOfCombatEffects() {
+	if (player1IsLeader) {
+		addToActionLog("Applying Player 1's End-of-Combat Effects...", "important-entry");
+		applyEndOfCombatEffects(true);
+		addToActionLog("Applying Player 2's End-of-Combat Effects...", "important-entry");
+		applyEndOfCombatEffects(false);
+	} else {
+		addToActionLog("Applying Player 2's End-of-Combat Effects...", "important-entry");
+		applyEndOfCombatEffects(false);
+		addToActionLog("Applying Player 1's End-of-Combat Effects...", "important-entry");
+		applyEndOfCombatEffects(true);
+	}
+}
+
+// Arguable refactor this with how we apply Combat and EoT effects
+function applyEndOfCombatEffects(isPlayer1) {
+	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
+	for (var i = 0; i < lineup.length; i++) {
+		var card = lineup[i];
+		if (card != null) applyEndOfCombatEffectsOfCard(card);
+	}
+	displayLineup();
+}
+
+function applyEndOfCombatEffectsOfCard(card) {
+	if (card == null) {
+		console.log("applyEndOfCombatEffectsOfCard - ERROR: card is null");
+		return;
+	}
+	if (card.array != "lineup") {
+		console.log("applyEndOfCombatEffectsOfCard - ERROR: card is not in lineup");
+		return;
+	}
+
+	// TODO(bcen): support for EoC abilities
+
+	if (validateFactionBonus(card.isPlayer1, card.faction)) applyCustomAbilitiesOfCard(card, "factionBonus", "end-of-combat");
+
+	displayLineup();
+}
+
+// phaseType refers to "end-of-combat" or "end-of-turn" or "upkeep" or etc etc
+function applyCustomAbilitiesOfCard(card, category, phaseType) {
+	var abilities;
+	if (category == "factionBonus") {
+		abilities = card.factionBonus;
+	} else if (category == "abilities") {
+		abilities = card.abilities;
+	} else {
+		console.log("applyCustomAbilitiesOfCard - ERROR: unsupported category");
+		return;
+	}
+
+	// check the faction bonus to see if it's EoC
+	if (typeof(abilities) !== "undefined" && abilities != null) {
+		if (typeof(abilities.details) !== "undefined" && abilities.details.length > 0) {
+			// this is kind of unnecessary since I don't think we can have multiple faction bonuses,
+			// but good to be safe
+			for (var i = 0; i < abilities.details.length; i++) {
+				if (abilities.details[i].type == phaseType) {
+					handleCustomAbility(card, abilities.details[i].functionName, abilities.details[i].parameters, category);
+				}
+			}
 		}
 	}
 }
@@ -686,7 +760,7 @@ function applyCombatAction(card) {
 		return;
 	}
 	// do nothing in the case where a card has no combat actions
-	if (card.combatActions == null) {
+	if (typeof(card.combatActions) === "undefined" || card.combatActions == null) {
 		return;
 	}
 
@@ -706,6 +780,8 @@ function applyCombatAction(card) {
 		var attackedPositions = getValidPositions(action.target);
 		for (var j = 0; j < attackedPositions.length; j++) {
 			if (attackedPositions[j] && lineupToAttack[j] != null) {
+				// need to add dmg specifically from combat too
+				lineupToAttack[j].dmgFromCombatThisTurn += action.dmg;
 				addDmg(lineupToAttack[j], action.dmg);
 				// adding a comma if something was added before
 				if (hitSomething) action_log_text += ", ";
@@ -870,8 +946,7 @@ function nextPhase() {
 // TODO(bcen): make this follow the leader
 // TODO(bcen): refactor json DB to somehow include EoC effects
 function endOfCombat() {
-	addToActionLog("Applying Player 1's End-of-Combat Effects...", "important-entry");
-	addToActionLog("Applying Player 2's End-of-Combat Effects...", "important-entry");
+	endOfCombatEffects();
 }
 
 // TODO(bcen): make this follow the leader
@@ -882,11 +957,17 @@ function endOfTurn() {
 
 	// Need to make every card in lineup lose Eager status
 	for (var i = 0; i < player1Lineup.length; i++) {
-		if (player1Lineup[i] != null) player1Lineup[i].firstRound = false;
+		if (player1Lineup[i] != null) endOfTurnUpdateCard(player1Lineup[i]);
 	}
 	for (var i = 0; i < player2Lineup.length; i++) {
-		if (player2Lineup[i] != null) player2Lineup[i].firstRound = false;
+		if (player2Lineup[i] != null) endOfTurnUpdateCard(player2Lineup[i]);
 	}
+}
+
+// Used for updating some of the properties of a card
+function endOfTurnUpdateCard(card) {
+	card.firstRound = false;
+	card.dmgFromCombatThisTurn = 0;
 }
 
 // TODO(bcen): handle other upkeep stuff
@@ -992,8 +1073,8 @@ function displayCard(i) {
 
 // Get card HTML string
 function getCardDisplayHTML(card) {
-	// this catches for lack of combat actions
 	var combatActionsText = (card.combatActions != null ? card.combatActions.description : "");
+	var factionBonusText = (card.factionBonus != null ? card.factionBonus.description : "");
 	var abilitiesText = (card.hasOwnProperty("abilities") ? card.abilities : "");
 
 	var htmlString = 
@@ -1004,7 +1085,7 @@ function getCardDisplayHTML(card) {
 		"<img src=\"" + card.imagePath + "\" alt=\"placeholder image\">" +
 		"<bodyHeaderCombat>Combat Actions</bodyHeaderCombat>" + "<p>" + combatActionsText + "</p>" +
 		"<bodyHeaderAbilities>Abilities</bodyHeaderAbilities>" + "<p>" + abilitiesText + "</p>" +
-		"<bodyHeaderFaction>Faction Bonus</bodyHeaderFaction>" + "<p>" + card.factionBonus + "</p>" +
+		"<bodyHeaderFaction>Faction Bonus</bodyHeaderFaction>" + "<p>" + factionBonusText + "</p>" +
 		"<div class=\"hp-dmg-container\">" +
 		"<hpHeader>HP: " + card.hp + "</hpHeader>" +
 		"<dmgHeader>DMG: " + card.dmg + "</dmgHeader>" +
@@ -1424,6 +1505,21 @@ function getValidPositions(num) {
 		num = Math.floor(num/2);
 	}
 	return array;
+}
+
+// helper that returns whether a faction is present in a player's lineup to allow faction bonus
+function validateFactionBonus(isPlayer1, faction) {
+	if (faction != "Legion" && faction != "Whirly West") {
+		console.log("validateFactionBonus - ERROR: invalid faction read");
+		return false;
+	}
+
+	var count = 0;
+	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
+	for (var i = 0; i < lineup.length; i++) {
+		if (lineup[i] != null && lineup[i].faction == faction) count++;
+	}
+	return (count >= 2);
 }
 
 /** I would consider the below functions to be legacy code because they depend on the card container id as opposed to the local id.
