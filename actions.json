@@ -4,7 +4,56 @@ actionsDB = [
 		"id": 1,
 		"name": "Swap Enemies",
 		"cost": 2,
-		"details": "Some test body text, idk idk idk idk",
+		"details": "Swap the positions of two adjacent character cards in the enemy lineup.",
+		"imagePath": "images/placeholder.jpg"
+	},
+	{
+		"id": 2,
+		"name": "Swap Allies",
+		"cost": 2,
+		"details": "Swap the positions of two adjacent character cards in your lineup.",
+		"imagePath": "images/placeholder.jpg"
+	},
+	{
+		"id": 3,
+		"name": "Retreat!",
+		"cost": 2,
+		"details": "Move a character card from your lineup to your standby pool.",
+		"imagePath": "images/placeholder.jpg"
+	},
+	{
+		"id": 4,
+		"name": "Red Potion",
+		"cost": 2,
+		"details": "Remove 2 DMG counters from a character card in your lineup or standby pool.",
+		"imagePath": "images/placeholder.jpg"
+	},
+	{
+		"id": 5,
+		"name": "Emergency Repairs",
+		"cost": 2,
+		"details": "(Requires a Whirly West character in your lineup) Remove 3 DMG counters from a Whirly West character card.",
+		"imagePath": "images/placeholder.jpg"
+	},
+	{
+		"id": 6,
+		"name": "Explosive Cask",
+		"cost": 2,
+		"details": "Add 2 DMG counters to a character card.",
+		"imagePath": "images/placeholder.jpg"
+	},
+	{
+		"id": 7,
+		"name": "Resupply",
+		"cost": 2,
+		"details": "(Requires a Utopia character in your lineup) Shuffle 4 ACTION cards of your choice in your discard pile into your deck.",
+		"imagePath": "images/placeholder.jpg"
+	},
+	{
+		"id": 8,
+		"name": "Tactical Reformation",
+		"cost": 2,
+		"details": "(Requires a Legion character in your lineup) Rearrange your lineup.",
 		"imagePath": "images/placeholder.jpg"
 	},
 ];
