@@ -127,8 +127,8 @@ window.onload = function() {
 
 	// render HTML of all lineup cards
 	displayLineup();
-	nextPhase();
 	toggleLeader();
+	nextPhase();
 
 	// setup listeners
 	setUpContextListener();
