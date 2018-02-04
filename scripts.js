@@ -1,5 +1,5 @@
 const phases = ["Upkeep", "Leader - Place Actions", "Non-Leader - Place Actions",  "Leader - Flip Actions", "Non-Leader - Flip Actions", "Combat", "End of Combat", "Resolve Combat", "End of Turn"];
-var phaseIndex = 0;
+var phaseIndex = -1;
 var roundNum = 0;
 // used for alternating colors per normal action log entry
 var normalActionLogEntryNum = 0;
@@ -11,6 +11,9 @@ var nextActionCardLocalIdToUse = 1;
 
 /* Used to track who is the leader of the round */
 var player1IsLeader = false;
+
+/* Toggle this true or false depending on if you want AI to be running Player 2 */
+var enableAI = false;
 
 /* used for card menu context menu */
 var cardMenu;
@@ -42,6 +45,9 @@ class Character {
 		this.array = null;
 		this.arrayIndex;
 		this.isPlayer1;
+
+		// used for Eager keyword
+		this.firstRound = false;
 	}
 }
 
@@ -127,7 +133,6 @@ window.onload = function() {
 
 	// render HTML of all lineup cards
 	displayLineup();
-	toggleLeader();
 	nextPhase();
 
 	// setup listeners
@@ -541,6 +546,10 @@ function moveCardToLineup(card, posIndex) {
 	}
 	card.array = "lineup";
 	card.arrayIndex = posIndex;
+	// used for Eager, if the card from somewhere that wasn't the lineup
+	if (originArray != "lineup") {
+			card.firstRound = true;
+	}
 	lineupToAddTo[posIndex] = card;
 
 	if (shouldLog) addToActionLog(buildMovedToText(card, originArray, originArrayIndex), "normal-entry");
@@ -683,14 +692,15 @@ function applyCombatAction(card) {
 
 	var lineupToAttack = (card.isPlayer1 ? player2Lineup : player1Lineup);
 	var actions = card.combatActions.details;
+	// iterate through every combat action
 	for (var i = 0; i < actions.length; i++) {
 		var action_log_text = card.name + " dealt ";
 		var hitSomething = false;
 
 		var action = actions[i];
-		var attackingPositions = getValidPositions(action.position);
-		// don't do anything if the card isn't in the right position
-		if (!attackingPositions[card.arrayIndex]) continue;
+		
+		// ignore this combat action if preconditions like position aren't met
+		if (!validateAction(card, action)) continue;
 
 		// apply damage to every targetted position
 		var attackedPositions = getValidPositions(action.target);
@@ -710,6 +720,29 @@ function applyCombatAction(card) {
 		}
 	}
 	displayLineup();
+}
+
+function validateAction(card, action) {
+	// if the action specifies position, then check if the card is in the right position
+	// otherwise ignore position (such as for EoT or EoC effects)
+	if (typeof(action.position) !== "undefined") {
+		var validPositions = getValidPositions(action.position);
+		if (!validPositions[card.arrayIndex]) return false;
+	}
+
+	// if the action specifies keyword, then check if the card qualifies
+	// otherwise ignore it
+	if (typeof(action.keyword) !== "undefined") {
+		switch (action.keyword) {
+			case "Eager":
+				if (!card.firstRound) return false;
+				break;
+			default:
+				break;
+		}
+	}
+
+	return true;
 }
 
 /*** FUNCTIONS CALLED FROM MAIN HTML COMPONENT aka Combat Field ***/
@@ -812,6 +845,9 @@ function nextPhase() {
 			break;
 		// combat
 		case 5:
+			// need to dump away the flipped cards to discard
+			moveFlipsToDiscards(true);
+			moveFlipsToDiscards(false);
 			combatActions();
 			break;
 		// end of combat
@@ -843,6 +879,14 @@ function endOfCombat() {
 function endOfTurn() {
 	addToActionLog("Applying Player 1's End-of-Turn Effects...", "important-entry");
 	addToActionLog("Applying Player 2's End-of-Turn Effects...", "important-entry");
+
+	// Need to make every card in lineup lose Eager status
+	for (var i = 0; i < player1Lineup.length; i++) {
+		if (player1Lineup[i] != null) player1Lineup[i].firstRound = false;
+	}
+	for (var i = 0; i < player2Lineup.length; i++) {
+		if (player2Lineup[i] != null) player2Lineup[i].firstRound = false;
+	}
 }
 
 // TODO(bcen): handle other upkeep stuff
@@ -887,6 +931,10 @@ function flipActionCards(isPlayer1) {
 	}
 
 	addToActionLog(action_log_text, "normal-entry");
+}
+
+function moveFlipsToDiscards(isPlayer1) {
+	var flips = (isPlayer1 ? player1Flips : player2Flips);
 
 	// TODO(bcen): maybe refactor this into a "clear array" method
 	// clear out all of flips, send to discard
@@ -894,7 +942,7 @@ function flipActionCards(isPlayer1) {
 	for (var i = 0; i < numToDiscard; i++) {
 		// needs to be this way since the flips array shrinks with each move
 		if (isPlayer1) moveCardToArray(player1Flips[0], "discards");
-		else moveCardToArray(player1Flips[0], "discards");
+		else moveCardToArray(player2Flips[0], "discards");
 	}
 }
 
@@ -1377,7 +1425,6 @@ function getValidPositions(num) {
 	}
 	return array;
 }
-
 
 /** I would consider the below functions to be legacy code because they depend on the card container id as opposed to the local id.
 	The plan would be to slowly phase these out from use and then delete.

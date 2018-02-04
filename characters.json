@@ -126,7 +126,7 @@ characterDB = {
 							"position": 15,
 							"target": 15,
 							"dmg": 1,
-							"keyword": 1
+							"keyword": "Eager"
 						},
 						{
 							"position": 15,
