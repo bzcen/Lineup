@@ -10,3 +10,5 @@ https://docs.google.com/spreadsheets/d/19YSdbDIrYURknm8D67S7bl1fV4q1Wg_i6ntb2bHr
 - [ ] Basic AI with a preset deck
 - [ ] Deck/Lineup creation screen
 - [ ] Data Metrics when game concludes
+- [ ] Load from Preset Loadouts (in form of JSON)
+- [ ] Hiding Player 2 Information if playing with AI
