@@ -13,3 +13,4 @@ https://docs.google.com/spreadsheets/d/19YSdbDIrYURknm8D67S7bl1fV4q1Wg_i6ntb2bHr
 - [ ] Load from Preset Loadouts (in form of JSON)
 - [ ] Hiding Player 2 Information if playing with AI
 - [ ] "Functionize" some of the End of Turn and End of Combat (would need to rearrange the character.json build)
+- [ ] Energy
