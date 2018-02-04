@@ -1,4 +1,4 @@
-const phases = ["Upkeep", "Place Actions", "Flip Actions", "Combat", "End of Combat", "Resolve Combat", "End of Turn"];
+const phases = ["Upkeep", "Leader - Place Actions", "Non-Leader - Place Actions",  "Leader - Flip Actions", "Non-Leader - Flip Actions", "Combat", "End of Combat", "Resolve Combat", "End of Turn"];
 var phaseIndex = 0;
 var roundNum = 0;
 // used for alternating colors per normal action log entry
@@ -8,6 +8,9 @@ var normalActionLogEntryNum = 0;
 var nextCardLocalIdToUse = 1; 
 /* used for local action card ids to be assigned to each action card */
 var nextActionCardLocalIdToUse = 1;
+
+/* Used to track who is the leader of the round */
+var player1IsLeader = false;
 
 /* used for card menu context menu */
 var cardMenu;
@@ -125,6 +128,7 @@ window.onload = function() {
 	// render HTML of all lineup cards
 	displayLineup();
 	nextPhase();
+	toggleLeader();
 
 	// setup listeners
 	setUpContextListener();
@@ -708,41 +712,6 @@ function applyCombatAction(card) {
 	displayLineup();
 }
 
-// TODO(bcen): make this follow the leader
-// TODO(bcen): refactor json DB to somehow include EoC effects
-function endOfCombat() {
-	addToActionLog("Applying Player 1's End-of-Combat Effects...", "important-entry");
-	addToActionLog("Applying Player 2's End-of-Combat Effects...", "important-entry");
-}
-
-// TODO(bcen): make this follow the leader
-// TODO(bcen): refactor json DB to somehow include EoT effects
-function endOfTurn() {
-	addToActionLog("Applying Player 1's End-of-Turn Effects...", "important-entry");
-	addToActionLog("Applying Player 2's End-of-Turn Effects...", "important-entry");
-}
-
-// TODO(bcen): handle other upkeep stuff
-function upkeep() {
-	slideLineups();
-	// both players draw a card
-	draw(true);
-	draw(false);
-}
-
-function draw(isPlayer1) {
-	var deck = (isPlayer1 ? player1Deck : player2Deck);
-
-	if (deck.length == 0) {
-		console.log("drawByCardMenu - ERROR: deck is empty");
-		return;
-	}
-	moveCardToArray(deck[0], "hand");
-
-	var player_text = (isPlayer1 ? "Player 1" : "Player 2");
-	addToActionLog(player_text + " drew a card", "normal-entry");
-}
-
 /*** FUNCTIONS CALLED FROM MAIN HTML COMPONENT aka Combat Field ***/
 
 function swapPositions(isPlayer1) {
@@ -801,6 +770,12 @@ function swapPositions(isPlayer1) {
 
 /*** PHASE FUNCTIONS ***/
 
+function toggleLeader() {
+	player1IsLeader = !player1IsLeader;
+	var player_text = (player1IsLeader ? "Player 1" : "Player 2");
+	addToActionLog(player_text + " is now the leader!", "normal-entry");
+}
+
 function nextPhase() {
 	phaseIndex++;
 	if (phaseIndex >= phases.length) phaseIndex = 0;
@@ -819,30 +794,107 @@ function nextPhase() {
 		case 0:
 			upkeep();
 			break;
-		// place actions
+		// leader - place actions
 		case 1:
 			break;
-		// flip actions
+		// non-leader - place actions
 		case 2:
 			break;
-		// combat
+		// leader - flip actions
 		case 3:
+			if (player1IsLeader) flipActionCards(true);
+			else flipActionCards(false);
+			break;
+		// non-leader - flip actions
+		case 4:
+			if (player1IsLeader) flipActionCards(false);
+			else flipActionCards(true);
+			break;
+		// combat
+		case 5:
 			combatActions();
 			break;
 		// end of combat
-		case 4:
+		case 6:
 			endOfCombat();
 			break;
 		// resolve combat
-		case 5:
+		case 7:
 			removeDefeatedFromLineups();
 			break;
 		// end of turn
-		case 6:
+		case 8:
 			endOfTurn();
 			break;
 		default:
 			break;
+	}
+}
+
+// TODO(bcen): make this follow the leader
+// TODO(bcen): refactor json DB to somehow include EoC effects
+function endOfCombat() {
+	addToActionLog("Applying Player 1's End-of-Combat Effects...", "important-entry");
+	addToActionLog("Applying Player 2's End-of-Combat Effects...", "important-entry");
+}
+
+// TODO(bcen): make this follow the leader
+// TODO(bcen): refactor json DB to somehow include EoT effects
+function endOfTurn() {
+	addToActionLog("Applying Player 1's End-of-Turn Effects...", "important-entry");
+	addToActionLog("Applying Player 2's End-of-Turn Effects...", "important-entry");
+}
+
+// TODO(bcen): handle other upkeep stuff
+function upkeep() {
+	slideLineups();
+	// both players draw a card
+	draw(true);
+	draw(false);
+
+	toggleLeader();
+}
+
+function draw(isPlayer1) {
+	var deck = (isPlayer1 ? player1Deck : player2Deck);
+
+	if (deck.length == 0) {
+		console.log("drawByCardMenu - ERROR: deck is empty");
+		return;
+	}
+	moveCardToArray(deck[0], "hand");
+
+	var player_text = (isPlayer1 ? "Player 1" : "Player 2");
+	addToActionLog(player_text + " drew a card", "normal-entry");
+}
+
+function flipActionCards(isPlayer1) {
+	var flips = (isPlayer1 ? player1Flips : player2Flips);
+
+	if (flips.length == 0) {
+		console.log("flipActionCards - ERROR: flips is empty");
+		return;
+	}
+
+	var player_text = (isPlayer1 ? "Player 1" : "Player 2");
+	var action_log_text = player_text + " flipped ";
+	var firstFlipAdded = false;
+
+	for (var i = 0; i < flips.length; i++) {
+		if (firstFlipAdded) action_log_text += ", ";
+		action_log_text += "<orchidText>" + flips[i].name + "</orchidText>";
+		firstFlipAdded = true;
+	}
+
+	addToActionLog(action_log_text, "normal-entry");
+
+	// TODO(bcen): maybe refactor this into a "clear array" method
+	// clear out all of flips, send to discard
+	var numToDiscard = flips.length;
+	for (var i = 0; i < numToDiscard; i++) {
+		// needs to be this way since the flips array shrinks with each move
+		if (isPlayer1) moveCardToArray(player1Flips[0], "discards");
+		else moveCardToArray(player1Flips[0], "discards");
 	}
 }
 
@@ -953,10 +1005,17 @@ function addToActionLog(text, entry_class) {
 
 // NOTE: depends on the card having been moved already
 function buildMovedToText(card, originArray, originArrayIndex) {
+	var player_text = (card.isPlayer1 ? "Player 1" : "Player 2");
 	var origin_array_text = getColorfiedArrayText(originArray, originArrayIndex);
 	var destination_array_text = getColorfiedArrayText(card.array, card.arrayIndex);
 
-	return card.name + " moved from " + origin_array_text + " to " + destination_array_text;
+	var card_text = card.name;
+
+	if (card.array == "deck" || card.array == "flips" || card.array == "hand" || card.array == "discards") {
+		card_text = "<orchidText>" + card_text + "</orchidText>";
+	}
+
+	return player_text + "'s " + card_text + " moved from " + origin_array_text + " to " + destination_array_text;
 }
 
 function getColorfiedArrayText(arrayString, arrayIndex) {
@@ -970,7 +1029,7 @@ function getColorfiedArrayText(arrayString, arrayIndex) {
 			array_text = "<firebrickText>Defeated</firebrickText>";
 			break;
 		case "standby":
-			array_text = "<lightgreenText>Standby</lightgreenText>";
+			array_text = "<reenText>Standby</reenText>";
 			break;
 		case "hand":
 			array_text = "Hand";

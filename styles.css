@@ -438,6 +438,16 @@ div[class$="modal-card-container"] {
 	flex-wrap: wrap;
 }
 
+.actions-modal-flips-container {
+	display: inline-flex;
+	flex-wrap: wrap;
+}
+
+.actions-modal-discards-container {
+	display: inline-flex;
+	flex-wrap: wrap;
+}
+
 	/* animation for modal */
 @keyframes animatetop {
     from {top: -300px; opacity: 0}
@@ -489,8 +499,8 @@ div[class$="modal-card-container"] {
 }
 
 /*** EXTRA ***/
-lightgreenText {
-	color: lightgreen;
+greenText {
+	color: green;
 }
 
 firebrickText {
@@ -499,4 +509,8 @@ firebrickText {
 
 blueText {
 	color: blue;
+}
+
+orchidText {
+	color: orchid;
 }
