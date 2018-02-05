@@ -1,6 +1,10 @@
 # Lineup
 Card Game in Progress
 
+## How To Run
++ Inside `./lineup/`, run `DEBUG=lineup:* npm run devstart`
++ On browser, go to `127.0.0.1:3000`
+
 ## Design Spreadsheet
 
 https://docs.google.com/spreadsheets/d/19YSdbDIrYURknm8D67S7bl1fV4q1Wg_i6ntb2bHrKm4/edit?usp=sharing
