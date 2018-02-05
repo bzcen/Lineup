@@ -1,3 +1,5 @@
+// Script file for handling card abilities and faction bonuses
+
 var factionBonusTag = "<mediumorchidText>[FACTION]</mediumorchidText> ";
 var abilitiesBonusTag = "<salmonText>[ABILITY]</salmonText> ";
 
