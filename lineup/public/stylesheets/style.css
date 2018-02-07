@@ -331,6 +331,10 @@ input[class$="header-button"] {
   	margin: 2px 5px;
 }
 
+.bottom-bar .control-panel .row .button--disabled {
+	background: grey;
+}
+
 .bottom-bar .action-log {
 	flex: 3;
 }

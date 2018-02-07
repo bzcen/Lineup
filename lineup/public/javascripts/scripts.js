@@ -484,6 +484,8 @@ function combatActions() {
 function applyCombatActions(isPlayer1) {
 	var funcArr = [];
 
+	funcArr.push(promisify(disableControlPanel));
+
 	funcArr.push(
 		promisifyWithDelay(() => {
 			if (isPlayer1) {
@@ -504,6 +506,7 @@ function applyCombatActions(isPlayer1) {
 	}
 
 	funcArr.push(promisify(hidePositionArrow));
+	funcArr.push(promisify(enableControlPanel));
 	return funcArr;
 }
 
@@ -685,6 +688,26 @@ function swapPositions(isPlayer1) {
 }
 
 /*** PHASE FUNCTIONS ***/
+
+function enableControlPanel() {
+	var bottom = document.getElementById("control-panel");
+	var buttons = bottom.getElementsByClassName("button");
+
+	for (var i = 0; i < buttons.length; i++) {
+		buttons[i].disabled = false;
+		buttons[i].classList.remove("button--disabled");
+	}
+}
+
+function disableControlPanel() {
+	var bottom = document.getElementById("control-panel");
+	var buttons = bottom.getElementsByClassName("button");
+
+	for (var i = 0; i < buttons.length; i++) {
+		buttons[i].disabled = true;
+		buttons[i].classList.add("button--disabled");
+	}
+}
 
 function toggleLeader() {
 	player1IsLeader = !player1IsLeader;
