@@ -469,7 +469,6 @@ function applyCustomAbilitiesOfCard(card, category, phaseType) {
 
 function addDmg(card, dmg) {
 	addAnimatedDmgTicker(card, dmg);
-	showPositionArrow(card.isPlayer1, card.arrayIndex);
 	card.dmg = card.dmg + dmg;
 	if (card.dmg < 0) card.dmg = 0;
 }
