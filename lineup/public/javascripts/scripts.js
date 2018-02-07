@@ -475,20 +475,48 @@ function addDmg(card, dmg) {
 // applies the combat actions of all cards in both lineups
 // TODO(bcen): make this follow the leader
 function combatActions() {
-	addToActionLog("Applying Player 1's Combat...", "important-entry");
-	applyCombatActions(true);
-
-	addToActionLog("Applying Player 2's Combat...", "important-entry");
-	applyCombatActions(false);
+	promisesInSerial(applyCombatActions(true).concat(applyCombatActions(false)));
 }
 
+// returns array of promises to complete each combat action
 function applyCombatActions(isPlayer1) {
+	var funcArr = [];
+
+	/*
+	funcArr.push(function() {
+		return new Promise((resolve, reject) => {
+			if (isPlayer1) {
+				addToActionLog("Applying Player 1's Combat...", "important-entry");
+			} else {
+				addToActionLog("Applying Player 2's Combat...", "important-entry");
+			}
+			setTimeout(resolve, 1250);
+		});
+	});*/
+
+	funcArr.push(
+		promisifyWithDelay(() => {
+			if (isPlayer1) {
+				addToActionLog("Applying Player 1's Combat...", "important-entry");
+			} else {
+				addToActionLog("Applying Player 2's Combat...", "important-entry");
+			}
+		}, 1250)
+	);
+
 	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
+
 	for (var i = 0; i < lineup.length; i++) {
-		var card = lineup[i];
-		if (card != null) applyCombatAction(card);
+		let card = lineup[i];
+		if (card != null) {
+
+			// build a promise queue with each combat action, separated by 1 sec delays
+			funcArr.push(
+				promisifyWithDelay(wrapFunction(applyCombatAction, this, [card]), 1250)
+			);
+		}
 	}
-	displayLineup();
+	return funcArr;
 }
 
 // apply the combat damage of an individual card
