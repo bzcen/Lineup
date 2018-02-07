@@ -399,48 +399,65 @@ function constructActionCardFromDB(cardName) {
 /*** END OF COMBAT EFFECTS ***/
 
 function endOfCombatEffects() {
-	if (player1IsLeader) {
-		addToActionLog("Applying Player 1's End-of-Combat Effects...", "important-entry");
-		applyEndOfCombatEffects(true);
-		addToActionLog("Applying Player 2's End-of-Combat Effects...", "important-entry");
-		applyEndOfCombatEffects(false);
-	} else {
-		addToActionLog("Applying Player 2's End-of-Combat Effects...", "important-entry");
-		applyEndOfCombatEffects(false);
-		addToActionLog("Applying Player 1's End-of-Combat Effects...", "important-entry");
-		applyEndOfCombatEffects(true);
-	}
+	if (player1IsLeader) promisesInSerial(applyEndOfCombatEffects(true).concat(applyEndOfCombatEffects(false)));
+	else  promisesInSerial(applyEndOfCombatEffects(false).concat(applyEndOfCombatEffects(true)));
 }
 
 // Arguable refactor this with how we apply Combat and EoT effects
+// returns an array of promises to execute each end-of-combat effect of every card in a lineup
 function applyEndOfCombatEffects(isPlayer1) {
+	var funcArr = [];
+	funcArr.push(promisify(disableControlPanel));
+
+	funcArr.push(
+		promisifyWithDelay(() => {
+			if (isPlayer1) {
+				addToActionLog("Applying Player 1's End-of-Combat Effects...", "important-entry");
+			} else {
+				addToActionLog("Applying Player 2's End-of-Combat Effects...", "important-entry");
+			}
+		}, 800)
+	);
+
 	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
 	for (var i = 0; i < lineup.length; i++) {
 		var card = lineup[i];
-		if (card != null) applyEndOfCombatEffectsOfCard(card);
+		if (card != null) {
+			funcArr = funcArr.concat(applyEndOfCombatEffectsOfCard(card));
+		}
 	}
-	displayLineup();
+
+	funcArr.push(promisify(hidePositionArrow));
+	funcArr.push(promisify(enableControlPanel));
+
+	return funcArr;
 }
 
+// returns an array of promises to execute each end-of-combat effect of a card
 function applyEndOfCombatEffectsOfCard(card) {
+	var funcArr = [];
 	if (card == null) {
 		console.log("applyEndOfCombatEffectsOfCard - ERROR: card is null");
-		return;
+		return funcArr;
 	}
 	if (card.array != "lineup") {
 		console.log("applyEndOfCombatEffectsOfCard - ERROR: card is not in lineup");
-		return;
+		return funcArr;
 	}
 
 	// TODO(bcen): support for EoC abilities
 
-	if (validateFactionBonus(card.isPlayer1, card.faction)) applyCustomAbilitiesOfCard(card, "factionBonus", "end-of-combat");
+	if (validateFactionBonus(card.isPlayer1, card.faction)) {
+		funcArr = funcArr.concat(applyCustomAbilitiesOfCard(card, "factionBonus", "end-of-combat"));
+	}
 
-	displayLineup();
+	return funcArr;
 }
 
 // phaseType refers to "end-of-combat" or "end-of-turn" or "upkeep" or etc etc
+// returns an array of promises to execute each custom ability that is appropriate
 function applyCustomAbilitiesOfCard(card, category, phaseType) {
+	var funcArr = [];
 	var abilities;
 	if (category == "factionBonus") {
 		abilities = card.factionBonus;
@@ -448,7 +465,7 @@ function applyCustomAbilitiesOfCard(card, category, phaseType) {
 		abilities = card.abilities;
 	} else {
 		console.log("applyCustomAbilitiesOfCard - ERROR: unsupported category");
-		return;
+		return funcArr;
 	}
 
 	// check the faction bonus to see if it's EoC
@@ -457,12 +474,19 @@ function applyCustomAbilitiesOfCard(card, category, phaseType) {
 			// this is kind of unnecessary since I don't think we can have multiple faction bonuses,
 			// but good to be safe
 			for (var i = 0; i < abilities.details.length; i++) {
-				if (abilities.details[i].type == phaseType) {
-					handleCustomAbility(card, abilities.details[i].functionName, abilities.details[i].parameters, category);
+				let ability = abilities.details[i];
+				if (ability.type == phaseType) {
+
+					let params = [card, ability.functionName, ability.parameters, category];
+					funcArr.push(
+						promisifyWithDelay(
+							wrapFunction(handleCustomAbility, this, params), 1000));
 				}
 			}
 		}
 	}
+
+	return funcArr;
 }
 
 /*** DMG FUNCTIONS ***/
@@ -492,7 +516,7 @@ function applyCombatActions(isPlayer1) {
 			} else {
 				addToActionLog("Applying Player 2's Combat...", "important-entry");
 			}
-		}, 1100)
+		}, 800)
 	);
 
 	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
@@ -530,14 +554,14 @@ function applyCombatActionsOfCard(card) {
 	for (var i = 0; i < actions.length; i++) {
 		// build a promise queue with each combat action, separated by 1 sec delays
 		funcArr.push(
-			promisifyWithDelay(wrapFunction(applyCombatActionOfCard, this, [card, actions[i]]), 1100)
+			promisifyWithDelay(wrapFunction(applyCombatActionOfCard, this, [card, actions[i]]), 1000)
 		)
 	}
 
 	return funcArr;
 }
 
-// applies a singe combat action of a card
+// applies a single combat action of a card
 // TODO(bcen) add error checking
 function applyCombatActionOfCard(card, action) {
 	var action_log_text = card.name + " dealt ";
@@ -595,9 +619,9 @@ function addAnimatedDmgTicker(card, dmg) {
 	
 	// animation code, clears itself after 30 frames
 	let framesPassed = 0;
-	let animationId = setInterval(tickerFrame, 20);
+	let animationId = setInterval(tickerFrame, 40);
 	function tickerFrame() {
-		if (framesPassed >= 30) {
+		if (framesPassed >= 40) {
 			clearInterval(animationId);
 			div.remove();
 		} else {

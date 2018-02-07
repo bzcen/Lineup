@@ -11,26 +11,38 @@ var abilitiesBonusTag = "<salmonText>[ABILITY]</salmonText> ";
 function handleCustomAbility(card, functionName, parameters, type) {
 	if (typeof(card) === "undefined" || card == null) {
 		console.log("handleCustomAbility - ERROR: cannot find card");
+		return;
 	}
 	if (typeof(functionName) === "undefined" || functionName == null) {
 		console.log("handleCustomAbility - ERROR: cannot find functionName");
+		return;
 	}
 
+	var result;
 	switch (functionName) {
 		case "preventDmgFromCombat":
-			preventDmgFromCombat(card, parameters, type);
+			result = preventDmgFromCombat(card, parameters, type);
 			break;
 		default:
 			break;
+	}
+
+	if (result) {
+		showPositionArrow(card.isPlayer1, card.arrayIndex);
+		// redisplay the lineup after doing something
+		displayLineup();
 	}
 }
 
 function preventDmgFromCombat(card, parameters, type) {
 	if (typeof(parameters) === "undefined" || parameters == null) {
 		console.log("preventDmgFromCombat - ERROR: cannot find parameters");
+		return false;
 	}
 
-	if (card.dmgFromCombatThisTurn >= parameters) {
+	if (card.dmgFromCombatThisTurn > 0) {
+		// if we have more prevented dmg than combat damage, reduce prevented dmg
+		parameters = (card.dmgFromCombatThisTurn > parameters ? parameters : card.dmgFromCombatThisTurn);
 		addDmg(card, parameters * -1);
 		card.dmgFromCombatThisTurn -= parameters;
 
@@ -40,5 +52,7 @@ function preventDmgFromCombat(card, parameters, type) {
 
 		action_log_text += card.name + " prevented <firebrickText>" + parameters + " DMG</firebrickText> from combat!"; 
 		addToActionLog(action_log_text, "normal-entry");
+		return true;
 	}
+	return false;
 }

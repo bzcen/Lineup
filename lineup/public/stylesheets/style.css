@@ -507,12 +507,14 @@ div[class$="modal-card-container"] {
 	color: red;
 	font-weight: bold;
 	font-size: 2em;
+	z-index: 11;
 }
 
 .green-dmg-ticker {
 	color: green;
 	font-weight: bold;
 	font-size: 2em;
+	z-index: 11;
 }
 
 /*** Position Arrow ***/
