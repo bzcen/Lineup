@@ -498,6 +498,19 @@ div[class$="modal-card-container"] {
 	background-color: #0066aa;
 }
 
+/*** Animated Tickers ***/
+.red-dmg-ticker {
+	color: red;
+	font-weight: bold;
+	font-size: 2em;
+}
+
+.green-dmg-ticker {
+	color: green;
+	font-weight: bold;
+	font-size: 2em;
+}
+
 /*** EXTRA ***/
 greenText {
 	color: green;

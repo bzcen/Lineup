@@ -59,22 +59,6 @@ function setUpContextListener() {
 	});
 }
 
-// helper function for checking if an element is within a className
-function clickInsideElement(e, className) {
-	var el = e.srcElement || e.target;
-
-	if (el.classList.contains(className)) {
-		return el;
-	} else {
-		while (el = el.parentNode) {
-			if (el.classList && el.classList.contains(className)) {
-				return el;
-			}
-		}
-	}
-	return false;
-}
-
 // helper function for modifying the position of a card menu context menu
 function positionCardMenu(e) {
 	cardMenuPosition = getEventPosition(e);
@@ -83,26 +67,6 @@ function positionCardMenu(e) {
 
 	cardMenu.style.left = cardMenuPositionX;
 	cardMenu.style.top = cardMenuPositionY;
-}
-
-// helper function for getting the position of an event
-function getEventPosition(e) {
-	var posx = 0;
-	var posy = 0;
-	if (!e) var e = window.event;
-
-	if (e.pageX || e.pageY) {
-		posx = e.pageX;
-		posy = e.pageY;
-	} else if (e.clientX || e.clientY) {
-		posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-		posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-	}
-
-	return {
-		x: posx,
-		y: posy
-	}
 }
 
 function toggleCardMenuOn(type) {

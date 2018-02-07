@@ -468,6 +468,7 @@ function applyCustomAbilitiesOfCard(card, category, phaseType) {
 /*** DMG FUNCTIONS ***/
 
 function addDmg(card, dmg) {
+	addAnimatedDmgTicker(card, dmg);
 	card.dmg = card.dmg + dmg;
 	if (card.dmg < 0) card.dmg = 0;
 }
@@ -482,18 +483,6 @@ function combatActions() {
 function applyCombatActions(isPlayer1) {
 	var funcArr = [];
 
-	/*
-	funcArr.push(function() {
-		return new Promise((resolve, reject) => {
-			if (isPlayer1) {
-				addToActionLog("Applying Player 1's Combat...", "important-entry");
-			} else {
-				addToActionLog("Applying Player 2's Combat...", "important-entry");
-			}
-			setTimeout(resolve, 1250);
-		});
-	});*/
-
 	funcArr.push(
 		promisifyWithDelay(() => {
 			if (isPlayer1) {
@@ -501,7 +490,7 @@ function applyCombatActions(isPlayer1) {
 			} else {
 				addToActionLog("Applying Player 2's Combat...", "important-entry");
 			}
-		}, 1250)
+		}, 1100)
 	);
 
 	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
@@ -509,63 +498,107 @@ function applyCombatActions(isPlayer1) {
 	for (var i = 0; i < lineup.length; i++) {
 		let card = lineup[i];
 		if (card != null) {
-
-			// build a promise queue with each combat action, separated by 1 sec delays
-			funcArr.push(
-				promisifyWithDelay(wrapFunction(applyCombatAction, this, [card]), 1250)
-			);
+			funcArr = funcArr.concat(applyCombatActionsOfCard(card));
 		}
 	}
 	return funcArr;
 }
 
-// apply the combat damage of an individual card
-function applyCombatAction(card) {
+// returns an array of promises to apply combat actions of a single card
+function applyCombatActionsOfCard(card) {
+	var funcArr = [];
 	if (card == null) {
-		console.log("applyCombatAction - ERROR: card is null");
-		return;
+		console.log("applyCombatActionsOfCard - ERROR: card is null");
+		return funcArr;
 	}
 	if (card.array != "lineup") {
-		console.log("applyCombatAction - ERROR: card is not in lineup");
-		return;
+		console.log("applyCombatActionsOfCard - ERROR: card is not in lineup");
+		return funcArr;
 	}
 	// do nothing in the case where a card has no combat actions
 	if (typeof(card.combatActions) === "undefined" || card.combatActions == null) {
-		return;
+		return funcArr;
 	}
 
-	var lineupToAttack = (card.isPlayer1 ? player2Lineup : player1Lineup);
 	var actions = card.combatActions.details;
 	// iterate through every combat action
 	for (var i = 0; i < actions.length; i++) {
-		var action_log_text = card.name + " dealt ";
-		var hitSomething = false;
+		// build a promise queue with each combat action, separated by 1 sec delays
+		funcArr.push(
+			promisifyWithDelay(wrapFunction(applyCombatActionOfCard, this, [card, actions[i]]), 1100)
+		)
+	}
 
-		var action = actions[i];
-		
-		// ignore this combat action if preconditions like position aren't met
-		if (!validateAction(card, action)) continue;
+	return funcArr;
+}
 
-		// apply damage to every targetted position
-		var attackedPositions = getValidPositions(action.target);
-		for (var j = 0; j < attackedPositions.length; j++) {
-			if (attackedPositions[j] && lineupToAttack[j] != null) {
-				// need to add dmg specifically from combat too
-				lineupToAttack[j].dmgFromCombatThisTurn += action.dmg;
-				addDmg(lineupToAttack[j], action.dmg);
-				// adding a comma if something was added before
-				if (hitSomething) action_log_text += ", ";
-				action_log_text += "<firebrickText>" + action.dmg + " DMG</firebrickText> to " +
-					lineupToAttack[j].name + " <blueText>(Pos " + (j+1) + ")</blueText>";
-				hitSomething = true;
-			}
-		}
-		// if something hit, print to action log!
-		if (hitSomething) {
-			addToActionLog(action_log_text, "normal-entry");
+// applies a singe combat action of a card
+// TODO(bcen) add error checking
+function applyCombatActionOfCard(card, action) {
+	var action_log_text = card.name + " dealt ";
+	var hitSomething = false;
+	
+	// ignore this combat action if preconditions like position aren't met
+	if (!validateAction(card, action)) return;
+
+	// apply damage to every targetted position
+	var attackedPositions = getValidPositions(action.target);
+	var lineupToAttack = (card.isPlayer1 ? player2Lineup : player1Lineup);
+	for (var j = 0; j < attackedPositions.length; j++) {
+		if (attackedPositions[j] && lineupToAttack[j] != null) {
+			// need to add dmg specifically from combat too
+			lineupToAttack[j].dmgFromCombatThisTurn += action.dmg;
+			addDmg(lineupToAttack[j], action.dmg);
+			// adding a comma if something was added before
+			if (hitSomething) action_log_text += ", ";
+			action_log_text += "<firebrickText>" + action.dmg + " DMG</firebrickText> to " +
+				lineupToAttack[j].name + " <blueText>(Pos " + (j+1) + ")</blueText>";
+			hitSomething = true;
 		}
 	}
+	// if something hit, print to action log!
+	if (hitSomething) {
+		addToActionLog(action_log_text, "normal-entry");
+	}
 	displayLineup();
+}
+
+// adds an animated dmg ticker tag over a character card
+function addAnimatedDmgTicker(card, dmg) {
+	// grab the element as well as its absolute top/left position
+	let query = "[card-local-id=\"" + card.localId + "\"]";
+	let el = document.querySelectorAll(query)[0];
+	let offset = getOffset(el);
+
+	// build a new dmg ticker span
+	let div = document.createElement("span");
+	let text;
+	if (dmg > 0) {
+		div.classList.toggle("red-dmg-ticker");
+		text = "+" + dmg;
+	} else {
+		div.classList.toggle("green-dmg-ticker");
+		text = dmg;
+	}
+	// position the ticker in the horizontal middle of the card
+	div.style.left = offset.left + (el.offsetWidth/2) - 10 + 'px';
+	div.style.position = "absolute";
+	let content = document.createTextNode(text);
+	div.appendChild(content);
+	document.body.appendChild(div);
+	
+	// animation code, clears itself after 30 frames
+	let framesPassed = 0;
+	let animationId = setInterval(tickerFrame, 20);
+	function tickerFrame() {
+		if (framesPassed >= 30) {
+			clearInterval(animationId);
+			div.remove();
+		} else {
+			framesPassed++;
+			div.style.top = offset.top + (el.offsetHeight/3) - framesPassed + 'px';
+		}
+	}
 }
 
 function validateAction(card, action) {
@@ -869,7 +902,7 @@ function getCardDisplayHTML(card) {
 // Get action card HTML string
 function getActionCardDisplayHTML(actionCard) {
 	var htmlString =
-		"<div class=\"action-card-container\" card-local-id=\"" + actionCard.localId + "\">" +
+		"<div class=\"action-card-container\" action-card-local-id=\"" + actionCard.localId + "\">" +
 		"<div class=\"header\">" +
 		"<h3>" + actionCard.name + "</h3>" + "<div class=\"filler\"></div>" + "<h3>Cost: " + actionCard.cost + "</h3>" +
 		"</div>" +
@@ -1059,38 +1092,6 @@ function getCardFromLocalId(localId, isActionCard) {
 		if (card.localId == localId) return card;
 	} 
 	return null;
-}
-
-// helper to remove null spots in the card array index
-// returns a newly allocated array, so it needs to be assigned outside
-function cleanArray(array) {
-	array = array.filter(n=>n);
-	// fix indexes
-	for (var i = 0; i < array.length; i++) {
-		array[i].arrayIndex = i;
-	}
-	return array;
-}
-
-// apply Fisher-Yates Shuffle to an array
-// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array/12646864
-function shuffleArray(array) {
-	var currentIndex = array.length, temporaryValue, randomIndex;
-
-	// While there remain elements to shuffle...
-	while (0 !== currentIndex) {
-
-		// Pick a remaining element...
-		randomIndex = Math.floor(Math.random() * currentIndex);
-		currentIndex -= 1;
-
-		// And swap it with the current element.
-		temporaryValue = array[currentIndex];
-		array[currentIndex] = array[randomIndex];
-		array[randomIndex] = temporaryValue;
-	}
-
-	return array;
 }
 
 // helper that returns a new boolean array representing which positions are valid
