@@ -27,6 +27,16 @@ function promisifyWithDelay(func, ms) {
     };
 }
 
+// promisify a function
+function promisify(func) {
+    return () => {
+        return new Promise((resolve, reject) => {
+            func();
+            resolve();
+        });
+    }
+}
+
 // return an object {left, top} of the absolute position of an element
 function getOffset(el) {
     el = el.getBoundingClientRect();

@@ -469,6 +469,7 @@ function applyCustomAbilitiesOfCard(card, category, phaseType) {
 
 function addDmg(card, dmg) {
 	addAnimatedDmgTicker(card, dmg);
+	showPositionArrow(card.isPlayer1, card.arrayIndex);
 	card.dmg = card.dmg + dmg;
 	if (card.dmg < 0) card.dmg = 0;
 }
@@ -501,6 +502,8 @@ function applyCombatActions(isPlayer1) {
 			funcArr = funcArr.concat(applyCombatActionsOfCard(card));
 		}
 	}
+
+	funcArr.push(promisify(hidePositionArrow));
 	return funcArr;
 }
 
@@ -558,6 +561,7 @@ function applyCombatActionOfCard(card, action) {
 	}
 	// if something hit, print to action log!
 	if (hitSomething) {
+		showPositionArrow(card.isPlayer1, card.arrayIndex);
 		addToActionLog(action_log_text, "normal-entry");
 	}
 	displayLineup();
@@ -1074,6 +1078,31 @@ function hideActionsModal() {
 	modal.style.display= "none";
 	var hand_container = document.getElementById("actions-modal-hand-container");
 	hand_container.innerHTML = "";
+}
+
+/*** Position Arrow ***/
+
+// note that posIndex is 0-based
+function showPositionArrow(isPlayer1, posIndex) {
+	let arrow = document.getElementById("position-arrow");
+	var position_elements = document.getElementsByClassName("position-container");
+	let el;
+	if (isPlayer1) {
+		var fixed_ids = [3, 2, 1, 0];
+		el = position_elements[fixed_ids[posIndex]];
+	} else {
+		el = position_elements[posIndex + 4];
+	}
+	let offset = getOffset(el);
+	
+	arrow.style.top = offset.top + el.offsetHeight - 30 + "px";
+	arrow.style.left = offset.left + (el.offsetWidth/2) - 20 + "px";
+	arrow.style.display = "block";
+}
+
+function hidePositionArrow() {
+	let arrow = document.getElementById("position-arrow");
+	arrow.style.display = "none";
 }
 
 /*** OTHER HELPER FUNCTIONS ***/

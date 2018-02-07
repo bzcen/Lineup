@@ -511,6 +511,17 @@ div[class$="modal-card-container"] {
 	font-size: 2em;
 }
 
+/*** Position Arrow ***/
+#position-arrow {
+	width: 0;
+	height: 0;
+	border-left: 20px solid transparent;
+	border-right: 20px solid transparent;
+	border-bottom: 20px solid red;
+	display: none;
+	position: absolute;
+}
+
 /*** EXTRA ***/
 greenText {
 	color: green;
