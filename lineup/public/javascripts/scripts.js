@@ -553,8 +553,9 @@ function applyCombatActionsOfCard(card) {
 	// iterate through every combat action
 	for (var i = 0; i < actions.length; i++) {
 		// build a promise queue with each combat action, separated by 1 sec delays
+		let action = actions[i];
 		funcArr.push(
-			promisifyWithDelay(wrapFunction(applyCombatActionOfCard, this, [card, actions[i]]), 1000)
+			promisifyWithDelay(wrapFunction(applyCombatActionOfCard, this, [card, action]), 1500)
 		)
 	}
 
@@ -574,14 +575,19 @@ function applyCombatActionOfCard(card, action) {
 	var attackedPositions = getValidPositions(action.target);
 	var lineupToAttack = (card.isPlayer1 ? player2Lineup : player1Lineup);
 	for (var j = 0; j < attackedPositions.length; j++) {
-		if (attackedPositions[j] && lineupToAttack[j] != null) {
-			// need to add dmg specifically from combat too
-			lineupToAttack[j].dmgFromCombatThisTurn += action.dmg;
-			addDmg(lineupToAttack[j], action.dmg);
+		if (attackedPositions[j] && lineupToAttack[j] != null) {			
+			let attacked = lineupToAttack[j];
+			let dmg = action.dmg;
+
+			addDmg(attacked, dmg);
+
+			// for the purposes of combat specific dmg
+			attacked.dmgFromCombatThisTurn += dmg;
+
 			// adding a comma if something was added before
 			if (hitSomething) action_log_text += ", ";
-			action_log_text += "<firebrickText>" + action.dmg + " DMG</firebrickText> to " +
-				lineupToAttack[j].name + " <blueText>(Pos " + (j+1) + ")</blueText>";
+			action_log_text += "<firebrickText>" + dmg + " DMG</firebrickText> to " +
+				attacked.name + " <blueText>(Pos " + (j+1) + ")</blueText>";
 			hitSomething = true;
 		}
 	}

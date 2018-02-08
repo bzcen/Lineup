@@ -528,6 +528,13 @@ div[class$="modal-card-container"] {
 	position: absolute;
 }
 
+.projectile {
+	max-width: 50px;
+	max-height: 80px;
+	position: absolute;
+	z-index: 11;
+}
+
 /*** EXTRA ***/
 greenText {
 	color: green;
