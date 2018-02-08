@@ -554,6 +554,7 @@ function applyCombatActionsOfCard(card) {
 	for (var i = 0; i < actions.length; i++) {
 		// build a promise queue with each combat action, separated by 1 sec delays
 		let action = actions[i];
+		if (!validateAction(card, action)) continue;
 		funcArr.push(
 			promisifyWithDelay(wrapFunction(applyCombatActionOfCard, this, [card, action]), 1500)
 		)
@@ -564,12 +565,12 @@ function applyCombatActionsOfCard(card) {
 
 // applies a single combat action of a card
 // TODO(bcen) add error checking
-function applyCombatActionOfCard(card, action) {
-	var action_log_text = card.name + " dealt ";
-	var hitSomething = false;
-	
+function applyCombatActionOfCard(card, action) {	
 	// ignore this combat action if preconditions like position aren't met
 	if (!validateAction(card, action)) return;
+
+	var action_log_text = card.name + " dealt ";
+	var hitSomething = false;
 
 	// apply damage to every targetted position
 	var attackedPositions = getValidPositions(action.target);
@@ -624,17 +625,20 @@ function addAnimatedDmgTicker(card, dmg) {
 	document.body.appendChild(div);
 	
 	// animation code, clears itself after 30 frames
-	let framesPassed = 0;
-	let animationId = setInterval(tickerFrame, 40);
-	function tickerFrame() {
-		if (framesPassed >= 40) {
-			clearInterval(animationId);
-			div.remove();
+	let start = null;
+	function step(timestamp) {
+
+		if (!start) start = timestamp;
+		var progress = timestamp - start;
+		div.style.top = offset.top + (el.offsetHeight/3) - (progress/40) + 'px';
+
+		if (progress < 1600) {
+			window.requestAnimationFrame(step);
 		} else {
-			framesPassed++;
-			div.style.top = offset.top + (el.offsetHeight/3) - framesPassed + 'px';
+			div.remove();
 		}
 	}
+	window.requestAnimationFrame(step);
 }
 
 function validateAction(card, action) {
@@ -702,6 +706,8 @@ function swapPositions(isPlayer1) {
 	var temp = lineup[indexA];
 	lineup[indexA] = lineup[indexB];
 	lineup[indexB] = temp;
+	lineup[indexA].arrayIndex = indexA;
+	lineup[indexB].arrayIndex = indexB;
 
 	displayCard(getCardId(isPlayer1, indexA));
 	displayCard(getCardId(isPlayer1, indexB));
