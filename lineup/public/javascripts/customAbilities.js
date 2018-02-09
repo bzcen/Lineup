@@ -40,6 +40,7 @@ function preventDmgFromCombat(card, parameters, type) {
 		return false;
 	}
 
+	// TODO(bcen): change this to the conditions library
 	if (card.dmgFromCombatThisTurn > 0) {
 		// if we have more prevented dmg than combat damage, reduce prevented dmg
 		parameters = (card.dmgFromCombatThisTurn > parameters ? parameters : card.dmgFromCombatThisTurn);
@@ -48,11 +49,38 @@ function preventDmgFromCombat(card, parameters, type) {
 
 		var action_log_text = "";
 		if (type == "factionBonus") action_log_text = factionBonusTag;
-		if (type == "ability") action_log_text = factionBonusTag;
+		if (type == "ability") action_log_text = abilitiesBonusTag;
 
-		action_log_text += card.name + " prevented <firebrickText>" + parameters + " DMG</firebrickText> from combat!"; 
+		action_log_text += card.name + " prevented " + getColorfiedDmgText(parameters) + " from combat!"; 
 		addToActionLog(action_log_text, "normal-entry");
 		return true;
 	}
 	return false;
+}
+
+// modularize this further to a "give modifier"
+function addDmgModifierToSelf(card, parameters, type) {
+	if (typeof(parameters) === "undefined" || parameters == null) {
+		console.log("addDmgModifierToSelf - ERROR: cannot find parameters");
+		return false;
+	}
+
+	var modifier_name;
+	if (parameters >= 0) modifier_name = "+";
+	modifier_name += parameters + " DMG";
+	card.modifiers.push(new CharacterModifier(modifier_name, card,
+		() => {
+			modifyCombatActionDmgOfCard(card, parameters);
+		},
+		() => {
+			modifyCombatActionDmgOfCard(card, parameters * (-1));
+		})
+	);
+	var action_log_text = "";
+	if (type == "factionBonus") action_log_text = factionBonusTag;
+	if (type == "ability") action_log_text = abilitiesBonusTag;
+
+	action_log_text += card.name + " gained the temporary modifier [" + modifier_name + "]";
+	addToActionLog(action_log_text, "normal-entry");
+	return true;
 }

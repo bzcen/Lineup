@@ -22,5 +22,11 @@ https://docs.google.com/spreadsheets/d/19YSdbDIrYURknm8D67S7bl1fV4q1Wg_i6ntb2bHr
 - [ ] Improve visibility/design of character card text
 - [ ] Reorganize the code base for better code management
 - [x] Add better visual feedback for dealing DMG
-- [ ] Improve performance of calculating DMG functions (reduce latency of promises)
+- [x] Improve performance of calculating DMG functions (reduce latency of promises)
 - [ ] Add visual feedback for temporary "buffs"
+- [ ] modularize the way we confirm if object properties exist (especially when read from JSON)
+- [x] Move faction bonuses to a separate JSON
+- [ ] Combine "conditions" and "position", it effectively means the same thing
+- [ ] Combine combat actions, abilities, and faction bonus into one generalized class that the character class can simply hold and call functions of
+- [ ] Modularize into a Game class (that tracks phases, characters defeated in a round, etc)
+- [ ] Refactor any phase effects into one function

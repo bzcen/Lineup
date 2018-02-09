@@ -30,6 +30,9 @@ var player2Flips = [];
 var player1Hand = [];
 var player2Hand = [];
 
+var player1CharacterDefeatedThisRound = false;
+var player2CharacterDefeatedThisRound = false;
+
 /*** SETUP FUNCTIONS ***/
 
 // TODO(bcen): need some sort of protection of adding nulls to a <4 player lineup
@@ -367,33 +370,16 @@ function removeDefeatedFromLineup(isPlayer1) {
 	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
 	for (var i = 0; i < lineup.length; i++) {
 		var card = lineup[i];
-		if (card != null && card.dmg >= card.hp) moveCardToDefeated(card);
-	}
-	displayLineup();
-}
-
-function constructCharacterFromDB(cardName) {
-	var factions = characterDB["factions"];
-	// iterate through properties of factions object (aka each faction)
-	for (var faction in factions) {
-		// characters is an array of objects
-		var characters = factions[faction];
-		for (var i = 0; i < characters.length; i++) {
-			if (characters[i].name == cardName) {
-				var c = characters[i];
-				return new Character(c.name, c.faction, c.level, c.imagePath, c.combatActions, c.abilities, c.factionBonus, c.hp);
+		if (card != null && card.dmg >= card.hp){
+			moveCardToDefeated(card);
+			if (isPlayer1) {
+				player1CharacterDefeatedThisRound = true;
+			} else {
+				player2CharacterDefeatedThisRound = true;
 			}
 		}
 	}
-}
-
-function constructActionCardFromDB(cardName) {
-	for (var i = 0; i < actionsDB.length; i++) {
-		if (actionsDB[i].name == cardName) {
-			var a = actionsDB[i];
-			return new ActionCard(a.name, a.cost, a.details, a.imagePath);
-		}
-	}
+	displayLineup();
 }
 
 /*** END OF COMBAT EFFECTS ***/
@@ -447,19 +433,18 @@ function applyEndOfCombatEffectsOfCard(card) {
 
 	// TODO(bcen): support for EoC abilities
 
-	if (validateFactionBonus(card.isPlayer1, card.faction)) {
-		funcArr = funcArr.concat(applyCustomAbilitiesOfCard(card, "factionBonus", "end-of-combat"));
-	}
+	funcArr = funcArr.concat(applyCustomAbilitiesOfCard(card, "factionBonus", "end-of-combat"));
 
 	return funcArr;
 }
 
 // phaseType refers to "end-of-combat" or "end-of-turn" or "upkeep" or etc etc
-// returns an array of promises to execute each custom ability that is appropriate
+// returns an array of promises to execute each custom ability of a card that should be called in the current phase
 function applyCustomAbilitiesOfCard(card, category, phaseType) {
 	var funcArr = [];
 	var abilities;
 	if (category == "factionBonus") {
+		if (!validateFactionBonus(card.isPlayer1, card.faction)) return funcArr;
 		abilities = card.factionBonus;
 	} else if (category == "abilities") {
 		abilities = card.abilities;
@@ -468,15 +453,13 @@ function applyCustomAbilitiesOfCard(card, category, phaseType) {
 		return funcArr;
 	}
 
-	// check the faction bonus to see if it's EoC
 	if (typeof(abilities) !== "undefined" && abilities != null) {
 		if (typeof(abilities.details) !== "undefined" && abilities.details.length > 0) {
-			// this is kind of unnecessary since I don't think we can have multiple faction bonuses,
-			// but good to be safe
 			for (var i = 0; i < abilities.details.length; i++) {
 				let ability = abilities.details[i];
 				if (ability.type == phaseType) {
-
+					// even if the phaseType is correct, need to check if extra conditions apply
+					if (!checkAllConditions(card, ability.conditions)) continue;
 					let params = [card, ability.functionName, ability.parameters, category];
 					funcArr.push(
 						promisifyWithDelay(
@@ -486,6 +469,45 @@ function applyCustomAbilitiesOfCard(card, category, phaseType) {
 		}
 	}
 
+	return funcArr;
+}
+
+/*** END OF TURN EFFECTS ***/
+function endOfTurnEffects() {
+
+}
+
+// TODO(bcen): very much so refactor this with EoC, upkeep effects, etc etc
+function applyEndOfTurnEffects(isPlayer1) {
+	var funcArr = [];
+	funcArr.push(promisify(disableControlPanel));
+
+	funcArr.push(
+		promisifyWithDelay(() => {
+			if (isPlayer1) {
+				addToActionLog("Applying Player 1's End-of-Turn Effects...", "important-entry");
+			} else {
+				addToActionLog("Applying Player 2's End-of-Turn Effects...", "important-entry");
+			}
+		}, 800)
+	);
+
+	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
+	for (var i = 0; i < lineup.length; i++) {
+		var card = lineup[i];
+		if (card != null) {
+			funcArr = funcArr.concat(applyEndOfTurnEffectsOfCard(card));
+		}
+	}
+
+	funcArr.push(promisify(hidePositionArrow));
+	funcArr.push(promisify(enableControlPanel));
+
+	return funcArr;
+}
+
+function applyEndOfTurnEffectsOfCard(card) {
+	var funcArr = [];
 	return funcArr;
 }
 
@@ -587,7 +609,7 @@ function applyCombatActionOfCard(card, action) {
 
 			// adding a comma if something was added before
 			if (hitSomething) action_log_text += ", ";
-			action_log_text += "<firebrickText>" + dmg + " DMG</firebrickText> to " +
+			action_log_text += getColorfiedDmgText(dmg) + " to " +
 				attacked.name + " <blueText>(Pos " + (j+1) + ")</blueText>";
 			hitSomething = true;
 		}
@@ -662,6 +684,32 @@ function validateAction(card, action) {
 	}
 
 	return true;
+}
+
+
+/*** CHARACTER CARD MODIFIERS ***/
+//TODO(bcen): store this in a static database
+function createModifier(name, card) {
+	if (name == "+1 DMG") {
+		return new CharacterModifier(name, card,
+			() => {
+				modifyCombatActionDmgOfCard(card, 1);
+			},
+			() => {
+				modifyCombatActionDmgOfCard(card, -1);
+			});
+	}
+	return null;
+}
+
+//TODO(bcen): this should be moved somewhere else
+function modifyCombatActionDmgOfCard(card, modifier) {
+	if (card.combatActions == null) {
+		return;
+	}
+	for (var i = 0; i < card.combatActions.details.length; i++)  {
+		card.combatActions.details[i].dmg = card.combatActions.details[i].dmg + modifier;
+	}
 }
 
 /*** FUNCTIONS CALLED FROM MAIN HTML COMPONENT aka Combat Field ***/
@@ -808,8 +856,6 @@ function nextPhase() {
 	}
 }
 
-// TODO(bcen): make this follow the leader
-// TODO(bcen): refactor json DB to somehow include EoC effects
 function endOfCombat() {
 	endOfCombatEffects();
 }
@@ -817,9 +863,6 @@ function endOfCombat() {
 // TODO(bcen): make this follow the leader
 // TODO(bcen): refactor json DB to somehow include EoT effects
 function endOfTurn() {
-	addToActionLog("Applying Player 1's End-of-Turn Effects...", "important-entry");
-	addToActionLog("Applying Player 2's End-of-Turn Effects...", "important-entry");
-
 	// Need to make every card in lineup lose Eager status
 	for (var i = 0; i < player1Lineup.length; i++) {
 		if (player1Lineup[i] != null) endOfTurnUpdateCard(player1Lineup[i]);
@@ -827,16 +870,26 @@ function endOfTurn() {
 	for (var i = 0; i < player2Lineup.length; i++) {
 		if (player2Lineup[i] != null) endOfTurnUpdateCard(player2Lineup[i]);
 	}
+
+	endOfTurnEffects();
+	addToActionLog("Applying Player 1's End-of-Turn Effects...", "important-entry");
+	addToActionLog("Applying Player 2's End-of-Turn Effects...", "important-entry");
 }
 
 // Used for updating some of the properties of a card
 function endOfTurnUpdateCard(card) {
 	card.firstRound = false;
 	card.dmgFromCombatThisTurn = 0;
+	while (card.modifiers.length > 0) {
+		(card.modifiers.pop()).endFunc();
+	}
+	console.log(card);
 }
 
 // TODO(bcen): handle other upkeep stuff
 function upkeep() {
+	player1CharacterDefeatedThisRound = false;
+	player2CharacterDefeatedThisRound = false;
 	slideLineups();
 	// both players draw a card
 	draw(true);
@@ -1010,6 +1063,10 @@ function buildMovedToText(card, originArray, originArrayIndex) {
 	}
 
 	return player_text + "'s " + card_text + " moved from " + origin_array_text + " to " + destination_array_text;
+}
+
+function getColorfiedDmgText(dmg) {
+	return "<firebrickText>" + dmg + " DMG</firebrickText>";
 }
 
 function getColorfiedArrayText(arrayString, arrayIndex) {

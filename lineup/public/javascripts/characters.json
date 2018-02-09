@@ -19,14 +19,6 @@ characterDB = {
 					]
 				},
 				"abilities": "During combat, prevent 1 DMG counter from being added to the character behind this character",
-				"factionBonus": {
-					"description": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
-					"details": [
-						{
-							"type": "end-of-turn",
-						}
-					]
-				},
 				"hp": 12	
 			},
 			{
@@ -37,14 +29,6 @@ characterDB = {
 				"imagePath": "images/legion_placeholder.jpg",
 				"combatActions": null,
 				"abilities": "At end of turn, remove 2 DMG counters from friendly characters in Position 1 and Position 2",
-				"factionBonus": {
-					"description": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
-					"details": [
-						{
-							"type": "end-of-turn",	
-						}
-					]
-				},
 				"hp": 6	
 			},
 			{
@@ -64,14 +48,6 @@ characterDB = {
 					]
 				},				
 				"abilities": "",
-				"factionBonus": {
-					"description": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
-					"details": [
-						{
-							"type": "end-of-turn",
-						}
-					]
-				},
 				"hp": 13	
 			},
 			{
@@ -91,14 +67,6 @@ characterDB = {
 					]
 				},
 				"abilities": "",
-				"factionBonus": {
-					"description": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
-					"details": [
-						{
-							"type": "end-of-turn",
-						}
-					]
-				},
 				"hp": 9
 			},
 			{
@@ -118,14 +86,6 @@ characterDB = {
 					]
 				},
 				"abilities": "At end of turn, remove 1 DMG counter from each character in your lineup",
-				"factionBonus": {
-					"description": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
-					"details": [
-						{
-							"type": "end-of-turn",
-						}
-					]
-				},
 				"hp": 7
 			},
 			{
@@ -150,14 +110,6 @@ characterDB = {
 					]
 				},
 				"abilities": "Whenever an opponent adds a character card to his/her lineup, add 3 DMG counters to it",
-				"factionBonus": {
-					"description": "At end of turn, if a character left the enemy lineup, gain +1 DMG to all Combat Actions for the next round only",
-					"details": [
-						{
-							"type": "end-of-turn",
-						}
-					]
-				},
 				"hp": 15
 			},
 		],
@@ -185,16 +137,6 @@ characterDB = {
 					]
 				},
 				"abilities": "",
-				"factionBonus": {
-					"description": "During combat, prevent 1 DMG counter from being added to this character",
-					"details": [
-						{
-							"type": "end-of-combat",
-							"functionName": "preventDmgFromCombat",
-							"parameters": 1,
-						}
-					]
-				},
 				"hp": 7
 			},
 			{
@@ -214,16 +156,6 @@ characterDB = {
 					]
 				},
 				"abilities": "",
-				"factionBonus": {
-					"description": "During combat, prevent 1 DMG counter from being added to this character",
-					"details": [
-						{
-							"type": "end-of-combat",
-							"functionName": "preventDmgFromCombat",
-							"parameters": 1,
-						}
-					]
-				},
 				"hp": 7
 			},
 			{
@@ -243,16 +175,6 @@ characterDB = {
 					]
 				},
 				"abilities": "",
-				"factionBonus": {
-					"description": "During combat, prevent 1 DMG counter from being added to this character",
-					"details": [
-						{
-							"type": "end-of-combat",
-							"functionName": "preventDmgFromCombat",
-							"parameters": 1,
-						}
-					]
-				},
 				"hp": 4
 			},
 			{
@@ -272,16 +194,6 @@ characterDB = {
 					]
 				},
 				"abilities": "",
-				"factionBonus": {
-					"description": "During combat, prevent 1 DMG counter from being added to this character",
-					"details": [
-						{
-							"type": "end-of-combat",
-							"functionName": "preventDmgFromCombat",
-							"parameters": 1,
-						}
-					]
-				},
 				"hp": 5
 			},
 			{
@@ -306,16 +218,6 @@ characterDB = {
 					]
 				},
 				"abilities": "During combat, if there is less than 4 character cards in your lineup, deal +1 DMG to all Combat Actions",
-				"factionBonus": {
-					"description": "During combat, prevent 1 DMG counter from being added to this character",
-					"details": [
-						{
-							"type": "end-of-combat",
-							"functionName": "preventDmgFromCombat",
-							"parameters": 1,
-						}
-					]
-				},
 				"hp": 10
 			},
 			{
@@ -335,16 +237,6 @@ characterDB = {
 					]
 				},
 				"abilities": "At end of turn, draw an ACTION card for each opposing character card that died during this turn's resolve combat phase",
-				"factionBonus": {
-					"description": "During combat, prevent 1 DMG counter from being added to this character",
-					"details": [
-						{
-							"type": "end-of-combat",
-							"functionName": "preventDmgFromCombat",
-							"parameters": 1,
-						}
-					]
-				},
 				"hp": 12
 			},
 		],
