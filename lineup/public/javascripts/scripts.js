@@ -391,8 +391,16 @@ function endOfCombatEffects() {
 
 /*** END OF TURN EFFECTS ***/
 function endOfTurnEffects() {
-	if (player1IsLeader) promisesInSerial(applyPhaseEffects(true, "end-of-turn").concat(applyPhaseEffects(false, "end-of-turn")));
-	else  promisesInSerial(applyPhaseEffects(false, "end-of-turn").concat(applyPhaseEffects(true, "end-of-turn")));
+	var funcArr = [];
+	if (player1IsLeader) {
+		funcArr = funcArr.concat(applyPhaseEffects(true, "end-of-turn"));
+		funcArr = funcArr.concat(applyPhaseEffects(false, "end-of-turn"));
+	} else {
+		funcArr = funcArr.concat(applyPhaseEffects(false, "end-of-turn"));
+		funcArr = funcArr.concat(applyPhaseEffects(true, "end-of-turn"));
+	}
+	funcArr.push(promisify(slideLineups));
+	promisesInSerial(funcArr);
 }
 
 // phaseType refers to "end-of-combat" or "end-of-turn" or "upkeep" or etc etc
@@ -726,7 +734,6 @@ function endOfTurn() {
 		if (player2Lineup[i] != null) player2Lineup[i].firstRound = false;
 	}
 	endOfTurnEffects();
-	slideLineups();
 }
 
 // Used for updating some of the properties of a card

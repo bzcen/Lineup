@@ -31,6 +31,8 @@ function handleConditions(card, functionName, parameters) {
             return characterInPositions(card, parameters);
         case "verifiedKeyword":
             return verifiedKeyword(card, parameters);
+        case "combatDmgThisRound":
+            return combatDmgThisRound(card, parameters);
         default:
             console.log("handleConditions - ERROR: unrecognized functionName");
 			return false;
@@ -103,6 +105,16 @@ function verifiedKeyword(card, parameters) {
         default:
             return false;
     }
+}
+
+// expected params: min combat damage
+function combatDmgThisRound(card, parameters) {
+    if (typeof(parameters) === "undefined" || parameters == null) {
+		console.log("combatDmgThisRound - ERROR: cannot find parameters");
+		return false;
+    }
+
+    return card.dmgFromCombatThisTurn >= parameters;
 }
 
 // helper that returns a new boolean array representing which positions are valid

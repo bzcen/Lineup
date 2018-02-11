@@ -25,8 +25,10 @@ function handleCustomAbility(card, functionName, parameters, type) {
 			break;
 		case "addDmgModifierToSelf":
 			result = addDmgModifierToSelf(card, parameters, type);
+			break;
 		case "addDmgToPositions":
 			result = addDmgToPositions(card, parameters, type);
+			break;
 		default:
 			break;
 	}
@@ -44,7 +46,7 @@ function preventDmgFromCombat(card, parameters, type) {
 		return false;
 	}
 
-	// TODO(bcen): change this to the conditions library
+	// this is a failsafe, but use the condition instead to prevent slowdown
 	if (card.dmgFromCombatThisTurn > 0) {
 		// if we have more prevented dmg than combat damage, reduce prevented dmg
 		parameters = (card.dmgFromCombatThisTurn > parameters ? parameters : card.dmgFromCombatThisTurn);

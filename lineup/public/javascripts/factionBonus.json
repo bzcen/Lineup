@@ -24,6 +24,12 @@ factionBonusDB = [
                 "type": "end-of-combat",
                 "functionName": "preventDmgFromCombat",
                 "parameters": 1,
+                "conditions" : [
+                    {
+                        "functionName": "combatDmgThisRound",
+                        "parameters": 1
+                    }
+                ]
             }
         ]
     }
