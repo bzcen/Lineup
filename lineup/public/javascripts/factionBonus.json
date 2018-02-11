@@ -9,8 +9,8 @@ factionBonusDB = [
 				"parameters": 1,
 				"conditions" : [
 			        {
-					    "functionName": "opponentDefeatedThisRound",
-						"parameters": [true, true]
+					    "functionName": "characterDefeatedThisRound",
+						"parameters": [false, true]
 					}
 				]
 			}

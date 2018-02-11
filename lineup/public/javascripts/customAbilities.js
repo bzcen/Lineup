@@ -18,11 +18,13 @@ function handleCustomAbility(card, functionName, parameters, type) {
 		return;
 	}
 
-	var result;
+	var result = false;;
 	switch (functionName) {
 		case "preventDmgFromCombat":
 			result = preventDmgFromCombat(card, parameters, type);
 			break;
+		case "addDmgModifierToSelf":
+			result = addDmgModifierToSelf(card, parameters, type);
 		default:
 			break;
 	}

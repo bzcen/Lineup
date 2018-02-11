@@ -385,57 +385,14 @@ function removeDefeatedFromLineup(isPlayer1) {
 /*** END OF COMBAT EFFECTS ***/
 
 function endOfCombatEffects() {
-	if (player1IsLeader) promisesInSerial(applyEndOfCombatEffects(true).concat(applyEndOfCombatEffects(false)));
-	else  promisesInSerial(applyEndOfCombatEffects(false).concat(applyEndOfCombatEffects(true)));
+	if (player1IsLeader) promisesInSerial(applyPhaseEffects(true, "end-of-combat").concat(applyPhaseEffects(false, "end-of-combat")));
+	else  promisesInSerial(applyPhaseEffects(false, "end-of-combat").concat(applyPhaseEffects(true, "end-of-combat")));
 }
 
-// Arguable refactor this with how we apply Combat and EoT effects
-// returns an array of promises to execute each end-of-combat effect of every card in a lineup
-function applyEndOfCombatEffects(isPlayer1) {
-	var funcArr = [];
-	funcArr.push(promisify(disableControlPanel));
-
-	funcArr.push(
-		promisifyWithDelay(() => {
-			if (isPlayer1) {
-				addToActionLog("Applying Player 1's End-of-Combat Effects...", "important-entry");
-			} else {
-				addToActionLog("Applying Player 2's End-of-Combat Effects...", "important-entry");
-			}
-		}, 800)
-	);
-
-	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
-	for (var i = 0; i < lineup.length; i++) {
-		var card = lineup[i];
-		if (card != null) {
-			funcArr = funcArr.concat(applyEndOfCombatEffectsOfCard(card));
-		}
-	}
-
-	funcArr.push(promisify(hidePositionArrow));
-	funcArr.push(promisify(enableControlPanel));
-
-	return funcArr;
-}
-
-// returns an array of promises to execute each end-of-combat effect of a card
-function applyEndOfCombatEffectsOfCard(card) {
-	var funcArr = [];
-	if (card == null) {
-		console.log("applyEndOfCombatEffectsOfCard - ERROR: card is null");
-		return funcArr;
-	}
-	if (card.array != "lineup") {
-		console.log("applyEndOfCombatEffectsOfCard - ERROR: card is not in lineup");
-		return funcArr;
-	}
-
-	// TODO(bcen): support for EoC abilities
-
-	funcArr = funcArr.concat(applyCustomAbilitiesOfCard(card, "factionBonus", "end-of-combat"));
-
-	return funcArr;
+/*** END OF TURN EFFECTS ***/
+function endOfTurnEffects() {
+	if (player1IsLeader) promisesInSerial(applyPhaseEffects(true, "end-of-turn").concat(applyPhaseEffects(false, "end-of-turn")));
+	else  promisesInSerial(applyPhaseEffects(false, "end-of-turn").concat(applyPhaseEffects(true, "end-of-turn")));
 }
 
 // phaseType refers to "end-of-combat" or "end-of-turn" or "upkeep" or etc etc
@@ -444,7 +401,10 @@ function applyCustomAbilitiesOfCard(card, category, phaseType) {
 	var funcArr = [];
 	var abilities;
 	if (category == "factionBonus") {
-		if (!validateFactionBonus(card.isPlayer1, card.faction)) return funcArr;
+		if (!validateFactionBonus(card.isPlayer1, card.faction)) {
+			console.log([card.name,"faction bonus invalidated"]);
+			return funcArr;
+		}
 		abilities = card.factionBonus;
 	} else if (category == "abilities") {
 		abilities = card.abilities;
@@ -459,7 +419,9 @@ function applyCustomAbilitiesOfCard(card, category, phaseType) {
 				let ability = abilities.details[i];
 				if (ability.type == phaseType) {
 					// even if the phaseType is correct, need to check if extra conditions apply
-					if (!checkAllConditions(card, ability.conditions)) continue;
+					if (!checkAllConditions(card, ability.conditions)) {
+						continue;
+					}
 					let params = [card, ability.functionName, ability.parameters, category];
 					funcArr.push(
 						promisifyWithDelay(
@@ -472,23 +434,30 @@ function applyCustomAbilitiesOfCard(card, category, phaseType) {
 	return funcArr;
 }
 
-/*** END OF TURN EFFECTS ***/
-function endOfTurnEffects() {
-
-}
-
-// TODO(bcen): very much so refactor this with EoC, upkeep effects, etc etc
-function applyEndOfTurnEffects(isPlayer1) {
+// generalized function that returns an array of promises of a player's lineup effects given a phase type
+// phase type can be "end-of-turn", "end-of-combat", "upkeep"
+function applyPhaseEffects(isPlayer1, phaseType) {
 	var funcArr = [];
 	funcArr.push(promisify(disableControlPanel));
 
 	funcArr.push(
 		promisifyWithDelay(() => {
-			if (isPlayer1) {
-				addToActionLog("Applying Player 1's End-of-Turn Effects...", "important-entry");
-			} else {
-				addToActionLog("Applying Player 2's End-of-Turn Effects...", "important-entry");
+			let phase_text;
+			switch(phaseType) {
+				case "end-of-turn":
+					phase_text = "End-of-Turn Effects";
+					break;
+				case "end-of-combat":
+					phase_text = "End-of-Combat Effects";
+					break;
+				case "upkeep":
+					phase_text = "Upkeep Effects";
+					break;
+				default:
+					break;
 			}
+			let player_text = (isPlayer1 ? "Player 1" : "Player 2");
+			addToActionLog("Applying " + player_text + "'s " + phase_text + "...", "important-entry");
 		}, 800)
 	);
 
@@ -496,18 +465,31 @@ function applyEndOfTurnEffects(isPlayer1) {
 	for (var i = 0; i < lineup.length; i++) {
 		var card = lineup[i];
 		if (card != null) {
-			funcArr = funcArr.concat(applyEndOfTurnEffectsOfCard(card));
+			funcArr = funcArr.concat(applyPhaseEffectsOfCard(card, phaseType));
 		}
 	}
-
+	
 	funcArr.push(promisify(hidePositionArrow));
 	funcArr.push(promisify(enableControlPanel));
-
 	return funcArr;
 }
 
-function applyEndOfTurnEffectsOfCard(card) {
-	var funcArr = [];
+// generalized function that returns an array of promises a card's effects given a phase type
+// phase type can be "end-of-turn", "end-of-combat", "upkeep"
+function applyPhaseEffectsOfCard(card, phaseType) {
+	let funcArr = [];
+	if (card == null) {
+		console.log("applyPhaseEffectsOfCard - ERROR: card is null");
+		return funcArr;
+	}
+	if (card.array != "lineup") {
+		console.log("applyPhaseEffectsOfCard - ERROR: card is not in lineup");
+		return funcArr;
+	}
+
+	// check abilities and faction bonus
+	funcArr = funcArr.concat(applyCustomAbilitiesOfCard(card, "abilities", phaseType));
+	funcArr = funcArr.concat(applyCustomAbilitiesOfCard(card, "factionBonus", phaseType));
 	return funcArr;
 }
 
@@ -860,9 +842,8 @@ function endOfCombat() {
 	endOfCombatEffects();
 }
 
-// TODO(bcen): make this follow the leader
-// TODO(bcen): refactor json DB to somehow include EoT effects
 function endOfTurn() {
+	// TODO(bcen): move these to the beginning of upkeep
 	// Need to make every card in lineup lose Eager status
 	for (var i = 0; i < player1Lineup.length; i++) {
 		if (player1Lineup[i] != null) endOfTurnUpdateCard(player1Lineup[i]);
@@ -872,8 +853,6 @@ function endOfTurn() {
 	}
 
 	endOfTurnEffects();
-	addToActionLog("Applying Player 1's End-of-Turn Effects...", "important-entry");
-	addToActionLog("Applying Player 2's End-of-Turn Effects...", "important-entry");
 }
 
 // Used for updating some of the properties of a card
@@ -883,7 +862,6 @@ function endOfTurnUpdateCard(card) {
 	while (card.modifiers.length > 0) {
 		(card.modifiers.pop()).endFunc();
 	}
-	console.log(card);
 }
 
 // TODO(bcen): handle other upkeep stuff
