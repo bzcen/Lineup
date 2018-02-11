@@ -87,9 +87,11 @@ function constructActionCardFromDB(cardName) {
 
 // TODO(bcen): these probably need an image path associated with it if we don't want plain text rep
 class CharacterModifier {
-	constructor(name, card, startFunc, endFunc) {
+	constructor(name, card, duration, startFunc, endFunc) {
 		this.name = name;
 		this.card = card;
+		// how many rounds this modifier should last for
+		this.duration = duration;
 		// the function that should be called when the modifier starts
 		this.startFunc = startFunc;
 		// the function that should be called when the modifier ends

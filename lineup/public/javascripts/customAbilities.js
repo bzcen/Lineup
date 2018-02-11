@@ -70,7 +70,8 @@ function addDmgModifierToSelf(card, parameters, type) {
 	var modifier_name;
 	if (parameters >= 0) modifier_name = "+";
 	modifier_name += parameters + " DMG";
-	card.modifiers.push(new CharacterModifier(modifier_name, card,
+	// TODO(bcen): change params so it's not always 2 rounds
+	card.modifiers.push(new CharacterModifier(modifier_name, card, 2,
 		() => {
 			modifyCombatActionDmgOfCard(card, parameters);
 		},
@@ -78,11 +79,19 @@ function addDmgModifierToSelf(card, parameters, type) {
 			modifyCombatActionDmgOfCard(card, parameters * (-1));
 		})
 	);
+	// activate the modifier immediately
+	card.modifiers[card.modifiers.length-1].startFunc();
+
 	var action_log_text = "";
 	if (type == "factionBonus") action_log_text = factionBonusTag;
 	if (type == "ability") action_log_text = abilitiesBonusTag;
 
-	action_log_text += card.name + " gained the temporary modifier [" + modifier_name + "]";
+	if (parameters >= 0) {
+		modifier_name = "<greenText>[" + modifier_name + "]</greenText>";
+	} else {
+		modifier_name = "<firebrickText>[" + modifier_name + "]</firebrickText>";
+	}
+	action_log_text += card.name + " gained the temporary modifier " + modifier_name;
 	addToActionLog(action_log_text, "normal-entry");
 	return true;
 }

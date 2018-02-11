@@ -458,7 +458,7 @@ function applyPhaseEffects(isPlayer1, phaseType) {
 			}
 			let player_text = (isPlayer1 ? "Player 1" : "Player 2");
 			addToActionLog("Applying " + player_text + "'s " + phase_text + "...", "important-entry");
-		}, 800)
+		}, 700)
 	);
 
 	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
@@ -520,7 +520,7 @@ function applyCombatActions(isPlayer1) {
 			} else {
 				addToActionLog("Applying Player 2's Combat...", "important-entry");
 			}
-		}, 800)
+		}, 700)
 	);
 
 	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
@@ -560,7 +560,7 @@ function applyCombatActionsOfCard(card) {
 		let action = actions[i];
 		if (!validateAction(card, action)) continue;
 		funcArr.push(
-			promisifyWithDelay(wrapFunction(applyCombatActionOfCard, this, [card, action]), 1500)
+			promisifyWithDelay(wrapFunction(applyCombatActionOfCard, this, [card, action]), 700)
 		)
 	}
 
@@ -670,19 +670,6 @@ function validateAction(card, action) {
 
 
 /*** CHARACTER CARD MODIFIERS ***/
-//TODO(bcen): store this in a static database
-function createModifier(name, card) {
-	if (name == "+1 DMG") {
-		return new CharacterModifier(name, card,
-			() => {
-				modifyCombatActionDmgOfCard(card, 1);
-			},
-			() => {
-				modifyCombatActionDmgOfCard(card, -1);
-			});
-	}
-	return null;
-}
 
 //TODO(bcen): this should be moved somewhere else
 function modifyCombatActionDmgOfCard(card, modifier) {
@@ -843,32 +830,42 @@ function endOfCombat() {
 }
 
 function endOfTurn() {
-	// TODO(bcen): move these to the beginning of upkeep
-	// Need to make every card in lineup lose Eager status
-	for (var i = 0; i < player1Lineup.length; i++) {
-		if (player1Lineup[i] != null) endOfTurnUpdateCard(player1Lineup[i]);
-	}
-	for (var i = 0; i < player2Lineup.length; i++) {
-		if (player2Lineup[i] != null) endOfTurnUpdateCard(player2Lineup[i]);
-	}
-
 	endOfTurnEffects();
+	slideLineups();
 }
 
 // Used for updating some of the properties of a card
-function endOfTurnUpdateCard(card) {
+function upkeepUpdateCard(card) {
 	card.firstRound = false;
 	card.dmgFromCombatThisTurn = 0;
-	while (card.modifiers.length > 0) {
-		(card.modifiers.pop()).endFunc();
+
+	var index = 0;
+	while (index < card.modifiers.length) {
+		var modifier = card.modifiers[index];
+		modifier.duration--;
+		if (modifier.duration <= 0) {
+			modifier.endFunc();
+			card.modifiers.splice(index, 1);
+		}
+		else {
+			index++;
+		}
 	}
+	console.log(card);
 }
 
 // TODO(bcen): handle other upkeep stuff
 function upkeep() {
 	player1CharacterDefeatedThisRound = false;
 	player2CharacterDefeatedThisRound = false;
-	slideLineups();
+
+	for (var i = 0; i < player1Lineup.length; i++) {
+		if (player1Lineup[i] != null) upkeepUpdateCard(player1Lineup[i]);
+	}
+	for (var i = 0; i < player2Lineup.length; i++) {
+		if (player2Lineup[i] != null) upkeepUpdateCard(player2Lineup[i]);
+	}
+
 	// both players draw a card
 	draw(true);
 	draw(false);
