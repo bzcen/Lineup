@@ -47,6 +47,30 @@ function constructCharacterFromDB(cardName) {
 			if (characters[i].name == cardName) {
 				var c = characters[i];
 
+				if (c.combatActions != null) {
+					// some extra work to build the combat actions attribute to match abilities/FB
+					// allows for code reuse with abilities and faction bonuses later on
+					for (var j = 0; j < c.combatActions.details.length; j++) {
+						var action = c.combatActions.details[j];
+						action.type = "combat";
+						action.functionName = "addDmgToPositions";
+						action.parameters = [action.dmg, action.target];
+						action.conditions = [
+							{functionName: "inPosition", parameters: action.position},
+							{functionName: "characterInPositions", parameters: [false, true, action.target]}
+						];
+						if (typeof(action.keyword) !== "undefined") {
+							action.conditions.push({functionName: "verifiedKeyword", parameters: action.keyword});
+							delete action.keyword;
+						}
+
+						delete action.dmg;
+						delete action.target;
+						delete action.position;
+					}
+				}
+
+				// grab the faction bonus from a separate JSON
 				var factionBonus = null;
 				for (var j = 0; j < factionBonusDB.length; j++) {
 					if (factionBonusDB[j].faction == c.faction) {

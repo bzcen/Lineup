@@ -408,6 +408,8 @@ function applyCustomAbilitiesOfCard(card, category, phaseType) {
 		abilities = card.factionBonus;
 	} else if (category == "abilities") {
 		abilities = card.abilities;
+	} else if (category == "combat") {
+		abilities = card.combatActions;
 	} else {
 		console.log("applyCustomAbilitiesOfCard - ERROR: unsupported category");
 		return funcArr;
@@ -453,6 +455,9 @@ function applyPhaseEffects(isPlayer1, phaseType) {
 				case "upkeep":
 					phase_text = "Upkeep Effects";
 					break;
+				case "combat":
+					phase_text = "Combat Actions";
+					break;
 				default:
 					break;
 			}
@@ -487,9 +492,13 @@ function applyPhaseEffectsOfCard(card, phaseType) {
 		return funcArr;
 	}
 
-	// check abilities and faction bonus
-	funcArr = funcArr.concat(applyCustomAbilitiesOfCard(card, "abilities", phaseType));
-	funcArr = funcArr.concat(applyCustomAbilitiesOfCard(card, "factionBonus", phaseType));
+	if (phaseType == "combat") {
+		funcArr = funcArr.concat(applyCustomAbilitiesOfCard(card, "combat", phaseType));
+	} else {
+		// check abilities and faction bonus
+		funcArr = funcArr.concat(applyCustomAbilitiesOfCard(card, "abilities", phaseType));
+		funcArr = funcArr.concat(applyCustomAbilitiesOfCard(card, "factionBonus", phaseType));
+	}
 	return funcArr;
 }
 
@@ -504,104 +513,7 @@ function addDmg(card, dmg) {
 // applies the combat actions of all cards in both lineups
 // TODO(bcen): make this follow the leader
 function combatActions() {
-	promisesInSerial(applyCombatActions(true).concat(applyCombatActions(false)));
-}
-
-// returns array of promises to complete each combat action
-function applyCombatActions(isPlayer1) {
-	var funcArr = [];
-
-	funcArr.push(promisify(disableControlPanel));
-
-	funcArr.push(
-		promisifyWithDelay(() => {
-			if (isPlayer1) {
-				addToActionLog("Applying Player 1's Combat...", "important-entry");
-			} else {
-				addToActionLog("Applying Player 2's Combat...", "important-entry");
-			}
-		}, 700)
-	);
-
-	var lineup = (isPlayer1 ? player1Lineup : player2Lineup);
-
-	for (var i = 0; i < lineup.length; i++) {
-		let card = lineup[i];
-		if (card != null) {
-			funcArr = funcArr.concat(applyCombatActionsOfCard(card));
-		}
-	}
-
-	funcArr.push(promisify(hidePositionArrow));
-	funcArr.push(promisify(enableControlPanel));
-	return funcArr;
-}
-
-// returns an array of promises to apply combat actions of a single card
-function applyCombatActionsOfCard(card) {
-	var funcArr = [];
-	if (card == null) {
-		console.log("applyCombatActionsOfCard - ERROR: card is null");
-		return funcArr;
-	}
-	if (card.array != "lineup") {
-		console.log("applyCombatActionsOfCard - ERROR: card is not in lineup");
-		return funcArr;
-	}
-	// do nothing in the case where a card has no combat actions
-	if (typeof(card.combatActions) === "undefined" || card.combatActions == null) {
-		return funcArr;
-	}
-
-	var actions = card.combatActions.details;
-	// iterate through every combat action
-	for (var i = 0; i < actions.length; i++) {
-		// build a promise queue with each combat action, separated by 1 sec delays
-		let action = actions[i];
-		if (!validateAction(card, action)) continue;
-		funcArr.push(
-			promisifyWithDelay(wrapFunction(applyCombatActionOfCard, this, [card, action]), 700)
-		)
-	}
-
-	return funcArr;
-}
-
-// applies a single combat action of a card
-// TODO(bcen) add error checking
-function applyCombatActionOfCard(card, action) {	
-	// ignore this combat action if preconditions like position aren't met
-	if (!validateAction(card, action)) return;
-
-	var action_log_text = card.name + " dealt ";
-	var hitSomething = false;
-
-	// apply damage to every targetted position
-	var attackedPositions = getValidPositions(action.target);
-	var lineupToAttack = (card.isPlayer1 ? player2Lineup : player1Lineup);
-	for (var j = 0; j < attackedPositions.length; j++) {
-		if (attackedPositions[j] && lineupToAttack[j] != null) {			
-			let attacked = lineupToAttack[j];
-			let dmg = action.dmg;
-
-			addDmg(attacked, dmg);
-
-			// for the purposes of combat specific dmg
-			attacked.dmgFromCombatThisTurn += dmg;
-
-			// adding a comma if something was added before
-			if (hitSomething) action_log_text += ", ";
-			action_log_text += getColorfiedDmgText(dmg) + " to " +
-				attacked.name + " <blueText>(Pos " + (j+1) + ")</blueText>";
-			hitSomething = true;
-		}
-	}
-	// if something hit, print to action log!
-	if (hitSomething) {
-		showPositionArrow(card.isPlayer1, card.arrayIndex);
-		addToActionLog(action_log_text, "normal-entry");
-	}
-	displayLineup();
+	promisesInSerial(applyPhaseEffects(true, "combat").concat(applyPhaseEffects(false, "combat")));
 }
 
 // adds an animated dmg ticker tag over a character card
@@ -644,30 +556,6 @@ function addAnimatedDmgTicker(card, dmg) {
 	}
 	window.requestAnimationFrame(step);
 }
-
-function validateAction(card, action) {
-	// if the action specifies position, then check if the card is in the right position
-	// otherwise ignore position (such as for EoT or EoC effects)
-	if (typeof(action.position) !== "undefined") {
-		var validPositions = getValidPositions(action.position);
-		if (!validPositions[card.arrayIndex]) return false;
-	}
-
-	// if the action specifies keyword, then check if the card qualifies
-	// otherwise ignore it
-	if (typeof(action.keyword) !== "undefined") {
-		switch (action.keyword) {
-			case "Eager":
-				if (!card.firstRound) return false;
-				break;
-			default:
-				break;
-		}
-	}
-
-	return true;
-}
-
 
 /*** CHARACTER CARD MODIFIERS ***/
 
@@ -830,13 +718,19 @@ function endOfCombat() {
 }
 
 function endOfTurn() {
+	// this needs to be separate from upkeepUpdateCard
+	for (var i = 0; i < player1Lineup.length; i++) {
+		if (player1Lineup[i] != null) player1Lineup[i].firstRound = false;
+	}
+	for (var i = 0; i < player2Lineup.length; i++) {
+		if (player2Lineup[i] != null) player2Lineup[i].firstRound = false;
+	}
 	endOfTurnEffects();
 	slideLineups();
 }
 
 // Used for updating some of the properties of a card
 function upkeepUpdateCard(card) {
-	card.firstRound = false;
 	card.dmgFromCombatThisTurn = 0;
 
 	var index = 0;
@@ -851,7 +745,6 @@ function upkeepUpdateCard(card) {
 			index++;
 		}
 	}
-	console.log(card);
 }
 
 // TODO(bcen): handle other upkeep stuff
@@ -1211,19 +1104,6 @@ function getCardFromLocalId(localId, isActionCard) {
 		if (card.localId == localId) return card;
 	} 
 	return null;
-}
-
-// helper that returns a new boolean array representing which positions are valid
-// we store these valid positions as a number in JSON
-function getValidPositions(num) {
-	var array = [];
-	for (var i = 0; i < 4; i++) {
-		if (num%2 == 1) array.push(true);
-		else array.push(false);
-
-		num = Math.floor(num/2);
-	}
-	return array;
 }
 
 // helper that returns whether a faction is present in a player's lineup to allow faction bonus

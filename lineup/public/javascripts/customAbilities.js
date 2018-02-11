@@ -25,6 +25,8 @@ function handleCustomAbility(card, functionName, parameters, type) {
 			break;
 		case "addDmgModifierToSelf":
 			result = addDmgModifierToSelf(card, parameters, type);
+		case "addDmgToPositions":
+			result = addDmgToPositions(card, parameters, type);
 		default:
 			break;
 	}
@@ -49,9 +51,7 @@ function preventDmgFromCombat(card, parameters, type) {
 		addDmg(card, parameters * -1);
 		card.dmgFromCombatThisTurn -= parameters;
 
-		var action_log_text = "";
-		if (type == "factionBonus") action_log_text = factionBonusTag;
-		if (type == "ability") action_log_text = abilitiesBonusTag;
+		var action_log_text = actionLogTextTag(type);
 
 		action_log_text += card.name + " prevented " + getColorfiedDmgText(parameters) + " from combat!"; 
 		addToActionLog(action_log_text, "normal-entry");
@@ -82,9 +82,7 @@ function addDmgModifierToSelf(card, parameters, type) {
 	// activate the modifier immediately
 	card.modifiers[card.modifiers.length-1].startFunc();
 
-	var action_log_text = "";
-	if (type == "factionBonus") action_log_text = factionBonusTag;
-	if (type == "ability") action_log_text = abilitiesBonusTag;
+	var action_log_text = actionLogTextTag(type);
 
 	if (parameters >= 0) {
 		modifier_name = "<greenText>[" + modifier_name + "]</greenText>";
@@ -94,4 +92,49 @@ function addDmgModifierToSelf(card, parameters, type) {
 	action_log_text += card.name + " gained the temporary modifier " + modifier_name;
 	addToActionLog(action_log_text, "normal-entry");
 	return true;
+}
+
+// params expected: [dmg, encoded attacked positions]
+function addDmgToPositions(card, parameters, type) {
+	var action_log_text = actionLogTextTag(type) + card.name + " dealt ";
+	var hitSomething = false;
+
+	// apply damage to every targetted position
+	var attackedPositions = getValidPositions(parameters[1]);
+	var lineupToAttack = (card.isPlayer1 ? player2Lineup : player1Lineup);
+	for (var j = 0; j < attackedPositions.length; j++) {
+		if (attackedPositions[j] && lineupToAttack[j] != null) {			
+			let attacked = lineupToAttack[j];
+			let dmg = parameters[0];
+
+			addDmg(attacked, dmg);
+
+			// for the purposes of combat specific dmg
+			attacked.dmgFromCombatThisTurn += dmg;
+
+			// adding a comma if something was added before
+			if (hitSomething) action_log_text += ", ";
+			action_log_text += getColorfiedDmgText(dmg) + " to " +
+				attacked.name + " <blueText>(Pos " + (j+1) + ")</blueText>";
+			hitSomething = true;
+		}
+	}
+	// if something hit, print to action log!
+	if (hitSomething) {
+		addToActionLog(action_log_text, "normal-entry");
+		return true;
+	}
+	return false;
+}
+
+// helper for building out the action log text
+function actionLogTextTag(type) {
+	switch(type) {
+		case "factionBonus":
+			return factionBonusTag;
+		case "ability":
+			return abilitiesBonusTag;
+		default:
+			return "";
+	}
 }
