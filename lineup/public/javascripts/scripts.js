@@ -573,7 +573,8 @@ function modifyCombatActionDmgOfCard(card, modifier) {
 		return;
 	}
 	for (var i = 0; i < card.combatActions.details.length; i++)  {
-		card.combatActions.details[i].dmg = card.combatActions.details[i].dmg + modifier;
+		// this is highly specific to how we construct combatActions in class.js
+		card.combatActions.details[i].parameters[0] = card.combatActions.details[i].parameters[0] + modifier;
 	}
 }
 
@@ -766,6 +767,8 @@ function upkeep() {
 		if (player2Lineup[i] != null) upkeepUpdateCard(player2Lineup[i]);
 	}
 
+	displayLineup();
+
 	// both players draw a card
 	draw(true);
 	draw(false);
@@ -885,6 +888,10 @@ function getCardDisplayHTML(card) {
 		"</div>" +
 		"</div>"
 	;
+
+	for (var i = 0; i < card.modifiers.length; i++) {
+		htmlString += "<span class=\"modifier-text\">" + card.modifiers[i].name + "</span>";
+	}
 
 	return htmlString;
 }

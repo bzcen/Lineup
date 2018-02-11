@@ -23,7 +23,7 @@ https://docs.google.com/spreadsheets/d/19YSdbDIrYURknm8D67S7bl1fV4q1Wg_i6ntb2bHr
 - [ ] Reorganize the code base for better code management
 - [x] Add better visual feedback for dealing DMG
 - [x] Improve performance of calculating DMG functions (reduce latency of promises)
-- [ ] Add visual feedback for temporary "buffs"
+- [x] Add visual feedback for temporary "buffs"
 - [ ] modularize the way we confirm if object properties exist (especially when read from JSON)
 - [x] Move faction bonuses to a separate JSON
 - [x] Combine "conditions" and "position", it effectively means the same thing

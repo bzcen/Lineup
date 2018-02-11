@@ -233,6 +233,13 @@ input[class$="header-button"] {
 	margin: 0px;
 }
 
+.modifier-text {
+	font-size: 0.7em;
+	margin-left: 2px;
+	margin-right: 2px;
+	background-color: white;
+}
+
 /*** ACTION CARDS ***/
 
 .action-card-container {
