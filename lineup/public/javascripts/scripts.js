@@ -8,7 +8,7 @@ var normalActionLogEntryNum = 0;
 var player1IsLeader = false;
 
 /* Toggle this true or false depending on if you want AI to be running Player 2 */
-var enableAI = false;
+var enableAI = true;
 
 var player1Cards = [];
 var player2Cards = [];
@@ -32,6 +32,9 @@ var player2Hand = [];
 
 var player1CharacterDefeatedThisRound = false;
 var player2CharacterDefeatedThisRound = false;
+
+var player1Energy = 0;
+var player2Energy = 0;
 
 /*** SETUP FUNCTIONS ***/
 
@@ -774,6 +777,10 @@ function upkeep() {
 	draw(true);
 	draw(false);
 
+	// both players gain 1 ENERGY
+	addEnergy(true, 1);
+	addEnergy(false, 1);
+
 	toggleLeader();
 }
 
@@ -792,20 +799,17 @@ function draw(isPlayer1) {
 
 function flipActionCards(isPlayer1) {
 	var flips = (isPlayer1 ? player1Flips : player2Flips);
+	var player_text = (isPlayer1 ? "Player 1" : "Player 2");
+	var action_log_text = player_text + " flipped ";
 
 	if (flips.length == 0) {
-		console.log("flipActionCards - ERROR: flips is empty");
+		addToActionLog(action_log_text + "zero cards!", "normal-entry");
 		return;
 	}
 
-	var player_text = (isPlayer1 ? "Player 1" : "Player 2");
-	var action_log_text = player_text + " flipped ";
-	var firstFlipAdded = false;
-
 	for (var i = 0; i < flips.length; i++) {
-		if (firstFlipAdded) action_log_text += ", ";
-		action_log_text += "<orchidText>" + flips[i].name + "</orchidText>";
-		firstFlipAdded = true;
+		if (i>0) action_log_text += ", ";
+		action_log_text += "<orchidText>" + flips[i].name + " (Cost " + flips[i].cost + ")</orchidText>";
 	}
 
 	addToActionLog(action_log_text, "normal-entry");
@@ -996,7 +1000,11 @@ function showStandbyModal(isPlayer1) {
 
 	card_container.innerHTML = "";
 	for (var i = 0; i < standby.length; i++) {
-		card_container.innerHTML += "<div class=\"card-outer-container\">" + getCardDisplayHTML(standby[i]) + "</div>";
+		if (enableAI && !isPlayer1) {
+			card_container.innerHTML += "<div class=\"card-outer-container\"><div class=\"card-container--hidden\"><h2>???</h2></div></div>";
+		} else {
+			card_container.innerHTML += "<div class=\"card-outer-container\">" + getCardDisplayHTML(standby[i]) + "</div>";
+		}
 	}
 }
 
@@ -1034,6 +1042,11 @@ function hideDefeatedModal() {
 function showActionsModal(isPlayer1) {
 	var modal = document.getElementById("actions-modal");
 	modal.style.display = "block";
+
+	var energy_label = document.getElementById("energy-label");
+	energy_label.innerHTML = "Energy: " + (isPlayer1 ? player1Energy : player2Energy);
+	// need to do this so that buttons know which energy to modify
+	energy_label.isPlayer1 = isPlayer1;
 
 	var hand = (isPlayer1 ? player1Hand : player2Hand);
 	var hand_container = document.getElementById("actions-modal-hand-container");
@@ -1101,6 +1114,36 @@ function showPositionArrow(isPlayer1, posIndex) {
 function hidePositionArrow() {
 	let arrow = document.getElementById("position-arrow");
 	arrow.style.display = "none";
+}
+
+/*** ENERGY FUNCTIONS ***/
+
+function addEnergy(isPlayer1, num) {
+	if (isPlayer1) {
+		player1Energy += num;
+		if (player1Energy < 0) player1Energy = 0;
+	}
+	else {
+		player2Energy += num;
+		if (player2Energy < 0) player2Energy = 0;
+	}
+
+	var player_text = (isPlayer1 ? "Player 1" : "Player 2");
+	var verb_text = (num >= 0 ? " increased by " : " decreased by ");
+	if (num < 0) num *= -1;
+	addToActionLog(player_text + "'s ENERGY" + verb_text + num, "normal-entry");
+}
+
+function add1EnergyFromModal() {
+	var energy_label = document.getElementById("energy-label");
+	addEnergy(energy_label.isPlayer1, 1);
+	showActionsModal(energy_label.isPlayer1);
+}
+
+function remove1EnergyFromModal() {
+	var energy_label = document.getElementById("energy-label");
+	addEnergy(energy_label.isPlayer1, -1);
+	showActionsModal(energy_label.isPlayer1);
 }
 
 /*** OTHER HELPER FUNCTIONS ***/
