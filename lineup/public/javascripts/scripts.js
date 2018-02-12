@@ -755,11 +755,12 @@ function upkeepUpdateCard(card) {
 	}
 }
 
-// TODO(bcen): handle other upkeep stuff
 function upkeep() {
 	player1CharacterDefeatedThisRound = false;
 	player2CharacterDefeatedThisRound = false;
 
+	// TODO(bcen): this should be happening to the standby pool as well
+	// otherwise a card moved to standby will never lose its modifiers
 	for (var i = 0; i < player1Lineup.length; i++) {
 		if (player1Lineup[i] != null) upkeepUpdateCard(player1Lineup[i]);
 	}
@@ -899,7 +900,7 @@ function getCardDisplayHTML(card) {
 // Get action card HTML string
 function getActionCardDisplayHTML(actionCard) {
 	var htmlString =
-		"<div class=\"action-card-container\" action-card-local-id=\"" + actionCard.localId + "\">" +
+		"<div class=\"action-card-container\" card-local-id=\"" + actionCard.localId + "\">" +
 		"<div class=\"header\">" +
 		"<h3>" + actionCard.name + "</h3>" + "<div class=\"filler\"></div>" + "<h3>Cost: " + actionCard.cost + "</h3>" +
 		"</div>" +
