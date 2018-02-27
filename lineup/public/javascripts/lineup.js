@@ -1,26 +1,6 @@
-var factory = require('./factory.js');
-
-class Player {
-    constructor(name) {
-        this.name = name;
-
-        // Character Cards
-        this.characters = [];
-        this.lineup = [];
-        this.standby = [];
-        this.defeated = [];
-
-        // ACTION Cards
-        this.actionCards = [];
-        this.deck = [];
-        this.discards = [];
-        this.flips = [];
-        this.hand = [];
-
-        // ENERGY
-        this.energy = 0;
-    }
-}
+var Player = require('./player.js');
+var Character = require('./character.js');
+var ActionCard = require('./actionCard.js');
 
 // Variables related to handling phases per round
 var GameState = {
@@ -36,10 +16,15 @@ var GameState = {
     player2CharacterDefeatedThisRound: false,
 };
 
-// Load default empty players with placeholder names into the game state.
-function loadDefaultPlayers() {
-    GameState.player1 = new Player("Player 1");
-    GameState.player2 = new Player("Player 2");
+/**
+ * Load default empty players with placeholder names into the game state.
+ * 
+ * @param {Function} callback 
+ */
+function loadDefaultPlayers(callback) {
+    GameState.player1 = Player.createPlayer("Player 1");
+    GameState.player2 = Player.createPlayer("Player 2");
+    callback(null);
 }
 
 /**
@@ -47,13 +32,34 @@ function loadDefaultPlayers() {
  * 
  * @param {String} actionCardName 
  * @param {Boolean} isPlayer1 
+ * @param {Function} callback
  */
-function loadActionCard(actionCardName, isPlayer1) {
-    var actionCards = getPlayer(isPlayer1).actionCards;
+function loadActionCard(actionCardName, isPlayer1, callback) {
+    var action = ActionCard.createActionCard(actionCardName);
+    if (!action) {
+        callback(new Error("could not construct action card"));
+    } else {
+        action.isPlayer1 = isPlayer1;
+        getPlayer(isPlayer1).addActionCard(action);
+        callback(null, action);
+    }
+}
 
-    var action = factory.constructActionCard(actionCardName);
-    action.isPlayer1 = isPlayer1;
-    actionCards.push(action);
+/**
+ * Get the ActionCard object with localId.
+ * 
+ * @param {Integer} localId 
+ * @param {Boolean} isPLayer1 
+ * @param {Function} callback 
+ */
+function getActionCardByLocalId(localId, isPLayer1, callback) {
+    var actionCard = getPlayer(isPlayer1).getActionCardByLocalId(localId);
+    if (!actionCard) {
+        typeof callback === 'function' && callback(new Error("could not find actionCard"));
+        return null;
+    }
+    typeof callback === 'function' && callback(null, actionCard);
+    return actionCard;
 }
 
 /**
@@ -61,120 +67,172 @@ function loadActionCard(actionCardName, isPlayer1) {
  * 
  * @param {String} characterName 
  * @param {Boolean} isPlayer1 
+ * @param {Function} callback
  */
-function loadCharacter(characterName, isPlayer1) {
-    var characters = getPlayer(isPlayer1).characters;
-
-    var character = factory.constructCharacter(characterName);
-    character.isPlayer1 = isPlayer1;
-    characters.push(character);
-}
-
-/** "Private" Helper Functions */
-
-/**
- * Moves a card from to another array, removing it from its previous spot
- * 
- * @param {Character || ActionCard} card
- * @param {String} arrayString
- */
-function moveCardToArray(card, arrayString) {
-    if (card == null) throw Error("tried to move null card");
-    if (card.array == arrayString) throw Error("tried to move card to the same array");
-
-    var player = getPlayer(card.isPlayer1);
-    var arrayToAddTo;
-    switch (arrayString) {
-        case "defeated":
-            arrayToAddTo = player.defeated;
-            break;
-        case "standby":
-            arrayToAddTo = player.standby;
-            break;
-        case "hand":
-            arrayToAddTo = player.hand;
-            break;
-        case "deck":
-            arrayToAddTo = player.deck;
-            break;
-        case "flips":
-            arrayToAddTo = player.flips;
-            break;
-        case "discards":
-            arrayToAddTo = player.discards;
-            break;
-        default:
-            throw Error("tried to move card to unrecognized array type");
-            break;
+function loadCharacter(characterName, isPlayer1, callback) {
+    var character = Character.createCharacter(characterName);
+    if (!character == null) {
+        typeof callback === 'function' && callback(new Error("could not construct character"));
+    } else {
+        character.isPlayer1 = isPlayer1;
+        getPlayer(isPlayer1).addCharacter(character);
+        typeof callback === 'function' && callback(null, character);
     }
-
-    if (card.array != null) {
-        removeCardFromCurrentArray(card);
-    }
-
-    card.array = arrayString;
-    card.arrayIndex = arrayToAddTo.length;
-    arrayToAddTo.push(card);
 }
 
 /**
- * Removes a card from its current array
+ * Get the Character object from a Player by unique name. Returns null if not found.
  * 
- * @param {Character || ActionCard} card
+ * @param {String} name 
+ * @param {Boolean} isPlayer1 
+ * @param {Function} callback
+ * @return {Character}
  */
-function removeCardFromCurrentArray(card) {
-    if (card == null) throw Error("tried removing null card");
-    if (card.array == null) throw Error("tried to remove card that was not in any array");
-
-    // if card is in lineup, replace it with null
-    if (card.array == "lineup") {
-        var lineup = getPlayer(card.isPlayer1).lineup;
-        lineup[card.arrayIndex] = null;
-        card.array = null;
-        return;
+function getCharacterByName(name, isPlayer1, callback) {
+    var character = getPlayer(isPlayer1).getCharacterByName(name);
+    if (!character) {
+        typeof callback === 'function' && callback(new Error("could not find character"));
+        return null;
     }
-
-    // in all other cases, we don't need to occupy the deleted spot
-    var player = getPlayer(card.isPlayer1);
-    var arrayToDeleteFrom;
-    switch (card.array) {
-        case "defeated":
-            arrayToDeleteFrom = player.defeated;
-            break;
-        case "standby":
-            arrayToDeleteFrom = player.standby;
-            break;
-        case "hand":
-            arrayToDeleteFrom = player.hand;
-            break;
-        case "deck":
-            arrayToDeleteFrom = player.deck;
-            break;
-        case "flips":
-            arrayToDeleteFrom = player.flips;
-            break;
-        case "discards":
-            arrayToDeleteFrom = player.discards;
-            break;
-        default:
-            break;
-    }
-
-    arrayToDeleteFrom.splice(card.arrayIndex, 1);
-    card.array = null;
+    typeof callback === 'function' && callback(null, character);
+    return character;
 }
 
 /**
  * Get the player object from GameState based of boolean.
  * 
  * @param {Boolean} isPlayer1 
+ * @return {Player}
  */
 function getPlayer(isPlayer1) {
     return (isPlayer1 ? GameState.player1 : GameState.player2);
+}
+
+/**
+ * Move a character to the player's defeated zone.
+ * 
+ * @param {String} name 
+ * @param {Boolean} isPlayer1 
+ * @param {Function} callback
+ */
+function moveCharacterToDefeated(name, isPlayer1, callback) {
+    var character = getPlayer(isPlayer1).getCharacterByName(name);
+    moveCardToArray(character, isPlayer1, "defeated", callback);
+}
+
+/**
+ * Move a character to the player's standby zone.
+ * 
+ * @param {String} name 
+ * @param {Boolean} isPlayer1 
+ * @param {Function} callback 
+ */
+function moveCharacterToStandby(name, isPlayer1, callback) {
+    var character = getPlayer(isPlayer1).getCharacterByName(name);
+    moveCardToArray(character, isPlayer1, "standby", callback);
+}
+
+/**
+ * Move a character to the player's lineup at a certain position.
+ * 
+ * @param {String} name 
+ * @param {Boolean} isPlayer1 
+ * @param {Integer} posIndex
+ * @param {Function} callback 
+ */
+function moveCharacterToLineup(name, isPlayer1, posIndex, callback) {
+    var character = getPlayer(isPlayer1).getCharacterByName(name);
+    moveCardToArray(character, isPlayer1, "lineup", callback, posIndex);
+}
+
+/**
+ * Move an Action Card to the player's hand.
+ * 
+ * @param {Integer} localId 
+ * @param {Boolean} isPlayer1 
+ * @param {Function} callback 
+ */
+function moveActionCardToHand(localId, isPlayer1, callback) {
+    var actionCard = getPlayer(isPlayer1).getActionCardByLocalId(localId);
+    moveCardToArray(actionCard, isPlayer1, "hand", callback);
+}
+
+/**
+ * Move an Action Card to the player's flips zone.
+ * 
+ * @param {Integer} localId 
+ * @param {Boolean} isPlayer1 
+ * @param {Function} callback 
+ */
+function moveActionCardToFlips(localId, isPlayer1, callback) {
+    var actionCard = getPlayer(isPlayer1).getActionCardByLocalId(localId);
+    moveCardToArray(actionCard, isPlayer1, "flips", callback);
+}
+
+/**
+ * Move an Action Card to the player's discards zone.
+ * 
+ * @param {Integer} localId 
+ * @param {Boolean} isPlayer1 
+ * @param {Function} callback 
+ */
+function moveActionCardToDiscards(localId, isPlayer1, callback) {
+    var actionCard = getPlayer(isPlayer1).getActionCardByLocalId(localId);
+    moveCardToArray(actionCard, isPlayer1, "discards", callback);
+}
+
+/**
+ * Move an Action Card to the player's deck zone.
+ * 
+ * @param {Integer} localId 
+ * @param {Boolean} isPlayer1 
+ * @param {Function} callback 
+ */
+function moveActionCardToDeck(localId, isPlayer1, callback) {
+    var actionCard = getPlayer(isPlayer1).getActionCardByLocalId(localId);
+    moveCardToArray(actionCard, isPlayer1, "deck", callback);
+}
+
+/**
+ * General function for moving a card from one player array to another.
+ * 
+ * @param {Character || ActionCard} card 
+ * @param {Boolean} isPlayer1 
+ * @param {String} arrayString 
+ * @param {Function} callback 
+ * @param {Integer} posIndex
+ */
+function moveCardToArray(card, isPlayer1, arrayString, callback, posIndex) {
+    if (!card) {
+        typeof callback === 'function' && callback(new Error("could not find card"));
+        return;
+    }
+
+    var player = getPlayer(isPlayer1);
+    try {
+        if (typeof posIndex === 'number') {
+            player.moveCardToLineup(card, posIndex)
+        } else {
+            player.moveCardToArray(card, arrayString);
+        }
+        typeof callback === 'function' && callback(null);
+    } catch (e) {
+        typeof callback === 'function' && callback(e);
+    }
 }
 
 module.exports = {
     loadDefaultPlayers: loadDefaultPlayers,
     loadActionCard: loadActionCard,
     loadCharacter: loadCharacter,
+    getCharacterByName: getCharacterByName,
+    getActionCardByLocalId: getActionCardByLocalId,
+    getPlayer: getPlayer,
+    moveCharacterToDefeated: moveCharacterToDefeated,
+    moveCharacterToLineup: moveCharacterToLineup,
+    moveCharacterToStandby: moveCharacterToStandby,
+    moveActionCardToDeck: moveActionCardToDeck,
+    moveActionCardToDiscards: moveActionCardToDiscards,
+    moveActionCardToFlips: moveActionCardToFlips,
+    moveActionCardToHand: moveActionCardToHand,
 };

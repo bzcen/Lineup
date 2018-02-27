@@ -1,11 +1,8 @@
-var characterStore = require('./characterStore.js');
-var actionStore = require('./actionStore.js');
 var factionBonusStore = require('./factionBonusStore');
+var characterStore = require('./characterStore');
 
 /* used for local card ids to be assigned to each added character card */
-var nextCardLocalIdToUse = 1; 
-/* used for local action card ids to be assigned to each action card */
-var nextActionCardLocalIdToUse = 1;
+var nextCharacterLocalIdToUse = 1; 
 
 class Character {
 	constructor(name, faction, level, imagePath, combatActions, abilities, factionBonus, hp) {
@@ -19,9 +16,9 @@ class Character {
 		this.hp = hp;
 		this.dmg = 0;
 
-		this.localId = nextCardLocalIdToUse;
+		this.localId = nextCharacterLocalIdToUse;
 		// increment the next local id to use
-		nextCardLocalIdToUse++;
+		nextCharacterLocalIdToUse++;
 
 		// represents the location of the card
 		this.array = null;
@@ -41,7 +38,7 @@ class Character {
 	}
 }
 
-function constructCharacter(cardName) {
+function createCharacter(cardName) {
 	var factions = characterStore["factions"];
 	// iterate through properties of factions object (aka each faction)
 	for (var faction in factions) {
@@ -86,48 +83,9 @@ function constructCharacter(cardName) {
 			}
 		}
 	}
-}
-
-class ActionCard {
-	constructor(name, cost, details, imagePath) {
-		this.name = name;
-		this.cost = cost;
-		this.details = details;
-		this.imagePath = imagePath;
-
-		this.localId = nextActionCardLocalIdToUse;
-		// increment the next local id to use
-		nextActionCardLocalIdToUse++;
-		this.isPlayer1;
-		this.array = null;
-		this.arrayIndex;
-	}
-}
-
-function constructActionCard(cardName) {
-	for (var i = 0; i < actionStore.length; i++) {
-		if (actionStore[i].name == cardName) {
-			var a = actionStore[i];
-			return new ActionCard(a.name, a.cost, a.details, a.imagePath);
-		}
-	}
-}
-
-// TODO(bcen): these probably need an image path associated with it if we don't want plain text rep
-class CharacterModifier {
-	constructor(name, card, duration, startFunc, endFunc) {
-		this.name = name;
-		this.card = card;
-		// how many rounds this modifier should last for
-		this.duration = duration;
-		// the function that should be called when the modifier starts
-		this.startFunc = startFunc;
-		// the function that should be called when the modifier ends
-		this.endFunc = endFunc;
-	}
+	return null;
 }
 
 module.exports = {
-	constructCharacter: constructCharacter,
-	constructActionCard: constructActionCard,
+    createCharacter: createCharacter,
 }
